@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="jbag",
-    version="0.0.1",
+    version="1.0.0",
     author="Dai Jian",
     author_email="daijian@stumail.ysu.edu.cn",
     description="Tools for medical image processing and deap learning.",
@@ -18,7 +18,6 @@ setuptools.setup(
         "numpy >= 1.21.0",
         "nibabel >= 4.0.1",
         "scipy >= 1.7.3",
-        "medpy >= 0.4.0",
         "SimpleITK >= 2.1.1.2",
         "pydicom >= 2.4.3",
         "dicom2nifti >= 2.4.8",

@@ -7,7 +7,7 @@ from torch.nn import DataParallel
 from torch.nn.parallel import DistributedDataParallel
 from torch.optim import Optimizer
 
-from jbag.log import log
+from jbag.log import logger
 
 MODEL = "model"
 OPTIMIZER = "optimizer"
@@ -34,20 +34,20 @@ def save_checkpoint(file, model: nn.Module, optimizer: Union[None, Optimizer] = 
 
 
 def load_checkpoint(file, model: Union[nn.Module, None] = None, optimizer: Union[Optimizer, None] = None):
-    log.info(f"Loading checkpoint {file}.")
+    logger.info(f"Loading checkpoint {file}.")
     checkpoint = torch.load(file)
     if model:
         if MODEL not in checkpoint:
-            log.warning(f"Checkpoint {file} does not include model state dict.")
+            logger.warning(f"Checkpoint {file} does not include model state dict.")
         else:
             model = get_unwrapped_model(model)
             model.load_state_dict(checkpoint[MODEL])
-            log.info("Model state loaded.")
+            logger.info("Model state loaded.")
 
     if optimizer:
         if OPTIMIZER not in checkpoint:
-            log.warning(f"Checkpoint {file} does not include optimizer state dict.")
+            logger.warning(f"Checkpoint {file} does not include optimizer state dict.")
         else:
             optimizer.load_state_dict(checkpoint[OPTIMIZER])
-            log.info(f"Optimizer state loaded.")
+            logger.info(f"Optimizer state loaded.")
     return checkpoint
