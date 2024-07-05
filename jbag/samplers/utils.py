@@ -58,7 +58,7 @@ def central_crop(data: Union[np.ndarray, torch.Tensor], center, shape):
     margin = get_margin(shape)[:, 0]
     # coordinate is the corner coordinate responding to the central.
     coordinate = center - margin
-    assert (coordinate >= 0).all(), "center {} or shape {} error".format(center, shape)
+    assert (coordinate >= 0).all(), 'center {} or shape {} error'.format(center, shape)
     cropped = crop_patch(data, coordinate, shape)
     return cropped
 

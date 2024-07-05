@@ -19,5 +19,5 @@ class SDF(Transform):
         for key in self.keys:
             segmentation = data[key]
             sdf_map = sdf(segmentation, self.normalize)
-            data[f"{key}_SDF"] = sdf_map
+            data[f'{key}_SDF'] = sdf_map
         return data

@@ -33,13 +33,13 @@ class GridSampler:
         if not (self.patch_size == self.valid_size).all():
             if isinstance(data, torch.Tensor):
                 pad_size = tuple(np.flip(self.coordinate_generator.padding_size, axis=0).flatten())
-                self.padded_data = F.pad(data, pad=pad_size, mode="constant", value=0)
+                self.padded_data = F.pad(data, pad=pad_size, mode='constant', value=0)
             else:
                 pad_size = self.coordinate_generator.padding_size
                 if len(self.full_size) != len(self.valid_size):
                     extra_dimensions = [[0, 0]] * (len(self.full_size) - len(self.valid_size))
                     pad_size = np.concatenate((np.asarray(extra_dimensions, dtype=np.int32), pad_size))
-                self.padded_data = np.pad(data, pad_width=pad_size, mode="constant", constant_values=0)
+                self.padded_data = np.pad(data, pad_width=pad_size, mode='constant', constant_values=0)
         else:
             self.padded_data = data
         self.index = 0

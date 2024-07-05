@@ -5,7 +5,7 @@ import lazyConfig
 
 
 def get_config(file):
-    with open(file, "rb") as f:
+    with open(file, 'rb') as f:
         config = tomllib.load(f)
     refine_nodes(config, config)
     config = lazyConfig.from_primitive(config)
@@ -40,8 +40,8 @@ def replace_str(key, node, root, list_index=None):
 
     """
 
-    reference_patten = r"(\$\{.+?\})"
-    reference_key_patten = r"\$\{(.+)\}"
+    reference_patten = r'(\$\{.+?\})'
+    reference_key_patten = r'\$\{(.+)\}'
     if list_index is not None:
         value = node[key][list_index]
     else:
@@ -73,7 +73,7 @@ def get_node_key(key, node, root):
 
     """
 
-    node_hierarchy = key.split(".")
+    node_hierarchy = key.split('.')
     # first, search on current node
     # second, search on root if search failed on current node
 
@@ -85,7 +85,7 @@ def get_node_key(key, node, root):
     node, unpacked_key = search_node(node_hierarchy, node)
     if node and unpacked_key:
         return node, unpacked_key
-    raise ValueError(f"config doesn't contain key: {key}")
+    raise ValueError(f'config doesn\'t contain key: {key}')
 
 
 def search_node(node_hierarchy, node):

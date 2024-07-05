@@ -15,7 +15,7 @@ def sdf(input, normalize=False):
     neg_segmentation = ~input
     neg_distance = distance_transform_edt(neg_segmentation)
 
-    boundary = find_boundaries(input, mode="inner")
+    boundary = find_boundaries(input, mode='inner')
     eps = 1e-6
     if normalize:
         sdf = (neg_distance - neg_distance.min()) / (neg_distance.max() - neg_distance.min() + eps) - \

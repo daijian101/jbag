@@ -17,7 +17,7 @@ def nifti2dicom(input_file, output_dir, accession_number=1):
 
     """
 
-    cmd = f"nifti2dicom -i {input_file} -o {output_dir} -a {accession_number}"
+    cmd = f'nifti2dicom -i {input_file} -o {output_dir} -a {accession_number}'
     result = os.popen(cmd)
     return result.readlines()
 

@@ -135,7 +135,7 @@ class GridCoordinateGenerator(CoordinateGenerator):
         """
 
         coordinate_dims = [range(0, i, j) for i, j in zip(self.original_shape, self.valid_shape)]
-        coordinates = np.meshgrid(*coordinate_dims, indexing="ij")
+        coordinates = np.meshgrid(*coordinate_dims, indexing='ij')
         coordinates = list(map(lambda x: x.flatten(), coordinates))
         # get the corner coordinate of each patch
         coordinates = np.stack(coordinates, axis=-1)

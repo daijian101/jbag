@@ -83,7 +83,7 @@ class RandScaleIntensity(ImageAugmentTransform):
         if isinstance(factors, (int, float)):
             self.factors = (min(-factors, factors), max(-factors, factors))
         elif len(factors) != 2:
-            raise ValueError(f"factors should be a number or a pair of numbers, got {factors}")
+            raise ValueError(f'factors should be a number or a pair of numbers, got {factors}')
         else:
             self.factors = (min(factors), max(factors))
 
@@ -113,7 +113,7 @@ class RandShiftIntensity(ImageAugmentTransform):
         if isinstance(offsets, (int, float)):
             self.offsets = (min(-offsets, offsets), max(-offsets, offsets))
         elif len(offsets) != 2:
-            raise ValueError(f"offsets should be a number or a pair of numbers, got {offsets}")
+            raise ValueError(f'offsets should be a number or a pair of numbers, got {offsets}')
         else:
             self.factors = (min(offsets), max(offsets))
 

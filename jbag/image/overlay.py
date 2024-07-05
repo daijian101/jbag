@@ -1,5 +1,5 @@
 from typing import Union
-
+import numpy as np
 import SimpleITK as sitk
 
 
@@ -13,8 +13,9 @@ def overlay(image, label_map, color_map: Union[list, tuple] = None, opacity=0.5)
             itk_color_map = list(color_map[-1])
             for i in color_map[:-1]:
                 itk_color_map += list(i)
-        overlay_image = sitk.LabelOverlay(image, label_map, opacity=opacity, colormap=itk_color_map)
+        overlaid_image = sitk.LabelOverlay(image, label_map, opacity=opacity, colormap=itk_color_map)
     else:
-        overlay_image = sitk.LabelOverlay(image, label_map, opacity=opacity)
-    overlay_image = sitk.GetArrayFromImage(overlay_image)
-    return overlay_image
+        overlaid_image = sitk.LabelOverlay(image, label_map, opacity=opacity)
+    overlaid_image = sitk.GetArrayFromImage(overlaid_image)
+    overlaid_image = np.transpose(overlaid_image, (2, 0, 1))
+    return overlaid_image
