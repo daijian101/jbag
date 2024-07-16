@@ -36,9 +36,9 @@ def write_list_2_txt(output_file, data_lst):
 
 
 def save_nifti(output_file,
-             data,
-             voxel_spacing=None,
-             orientation='LPI'):
+               data,
+               voxel_spacing=None,
+               orientation='LPI'):
     """
     Save image with nii format.
 
@@ -228,7 +228,7 @@ def scp(dst_user, dst_host, dst_path, local_path, dst_port=None, recursive=False
     Returns:
 
     """
-    
+
     assert send ^ receive
 
     cmd = 'scp'

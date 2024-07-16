@@ -5,7 +5,7 @@ class Transform(ABC):
     def __init__(self, keys):
         assert keys
         if isinstance(keys, str):
-            keys = (keys, )
+            keys = (keys,)
         self.keys = keys
 
     def __call__(self, data):

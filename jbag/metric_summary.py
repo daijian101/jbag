@@ -3,17 +3,20 @@ import torch
 
 
 class MetricSummary:
-    def __init__(self, metric_fn):
+    def __init__(self, metric_fn=None):
         self.metric_fn = metric_fn
         self.__evaluations = []
+
+    def __call__(self, input, target):
+        evaluation = self.metric_fn(input, target)
+        self.__evaluations.append(evaluation)
+        return evaluation
 
     def reset(self):
         self.__evaluations = []
 
-    def update(self, input, target):
-        evaluation = self.metric_fn(input, target)
-        self.__evaluations.append(evaluation)
-        return evaluation
+    def add_value(self, input_value):
+        self.__evaluations.append(input_value)
 
     def mean(self):
         if self.__evaluations:
