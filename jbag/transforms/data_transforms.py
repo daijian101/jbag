@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 from einops import rearrange, repeat
 
 from jbag.transforms.transforms import Transform
@@ -16,6 +17,16 @@ class ToType(Transform):
         return data
 
 
+class ToTensor(Transform):
+    def __init__(self, keys):
+        super().__init__(keys)
+
+    def _call_fun(self, data):
+        for key in self.keys:
+            data[key] = torch.from_numpy(data[key])
+        return data
+
+
 class Rearrange(Transform):
     def __init__(self, keys, pattern):
         """
@@ -25,7 +36,6 @@ class Rearrange(Transform):
             keys (str or sequence):
             pattern (str): Arranging pattern. For example "i j k -> j k i".
         """
-
         super().__init__(keys)
         self.pattern = pattern
 
@@ -60,7 +70,6 @@ class AddChannel(Transform):
             keys (str or sequence):
             dim (int):
         """
-
         super().__init__(keys)
         self.dim = dim
 
@@ -86,7 +95,6 @@ class ZscoreNormalization(Transform):
             mean_key (str or None, optional, default=None):
             std_key (str or None, optional, default=None):
         """
-
         super().__init__(keys)
         self.mean_value = mean_value
         self.std_value = std_value
@@ -115,7 +123,6 @@ class MinMaxNormalization(Transform):
             lower_bound_percentile (int, optional, default=1):
             upper_bound_percentile (int, optional, default=99):
         """
-
         super().__init__(keys)
         self.lower_bound_percentile = lower_bound_percentile
         self.upper_bound_percentile = upper_bound_percentile

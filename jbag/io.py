@@ -53,7 +53,6 @@ def save_nifti(output_file,
     Returns:
 
     """
-
     if voxel_spacing is None:
         voxel_spacing = (1.0, 1.0, 1.0)  # replace this with your desired voxel spacing in millimeters
 
@@ -110,7 +109,6 @@ def np_object_hook(dct):
     Returns:
 
     """
-
     if '__ndarray__' in dct:
         shape = dct['shape']
         dtype = descr_to_dtype(dct['dtype'])
@@ -143,7 +141,6 @@ def read_json(input_json_file):
     Returns:
 
     """
-
     if not os.path.exists(input_json_file):
         raise FileExistsError(f'{input_json_file} does not exist.')
     with open(input_json_file, 'r') as json_file:
@@ -162,7 +159,6 @@ class NumpyJSONEncoder(json.JSONEncoder):
             base64 (bool, optional, default=True): Use base64 to encode.
             **kwargs:
         """
-
         self.primitive = primitive
         self.base64 = base64
         super().__init__(**kwargs)
@@ -199,7 +195,6 @@ def save_json(output_file, obj, primitive=False, base64=True):
     Returns:
 
     """
-
     ensure_dir(output_file)
     with open(output_file, 'w') as file:
         json.dump(obj, file, cls=NumpyJSONEncoder, **{'primitive': primitive, 'base64': base64})
@@ -228,7 +223,6 @@ def scp(dst_user, dst_host, dst_path, local_path, dst_port=None, recursive=False
     Returns:
 
     """
-
     assert send ^ receive
 
     cmd = 'scp'

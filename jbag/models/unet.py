@@ -91,7 +91,6 @@ class UNet(nn.Module):
             normalize (bool, optional, default=True): If `True`, normalize the output using `torch.sigmoid` for one
                 dimension output, or `torch.softmax` for multiple classes output.
         """
-
         super().__init__()
         self.out_channels = out_channels
         encoder = UNetEncoder(in_channels=in_channels, width_factor=width_factor, blocks=blocks)

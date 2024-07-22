@@ -12,7 +12,6 @@ def aggregate_mean_std(mean1, std1, num1, mean2, std2, num2, ddof=1):
           num2 (int): Number of data in group2.
           ddof (int, optional, default=1): Means of delta degrees of freedom. Default is 1 for unbiased estimation.
     """
-
     mean = (num1 * mean1 + num2 * mean2) / (num1 + num2)
     d = ((num1 - ddof) * std1 ** 2 + (num2 - ddof) * std2 ** 2) / (num1 + num2 - ddof) + \
         num1 * num2 * (mean1 - mean2) ** 2 / (num1 + num2) / (num1 + num2 - ddof)

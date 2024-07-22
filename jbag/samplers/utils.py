@@ -15,7 +15,6 @@ def get_margin(patch_size):
     Returns:
 
     """
-
     if not isinstance(patch_size, np.ndarray):
         patch_size = np.asarray(patch_size)
 
@@ -52,7 +51,6 @@ def central_crop(data: Union[np.ndarray, torch.Tensor], center, shape):
     Returns:
 
     """
-
     assert len(data.shape) >= len(shape) == len(center)
     center = np.asarray(center)
     margin = get_margin(shape)[:, 0]
@@ -76,7 +74,6 @@ def crop_patch(data: Union[np.ndarray, torch.Tensor], coordinate, patch_size):
     Returns:
 
     """
-
     data_shape = data.shape
     assert len(data_shape) >= len(coordinate) == len(patch_size)
     end = coordinate + patch_size

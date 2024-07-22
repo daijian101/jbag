@@ -19,7 +19,6 @@ class GridSampler:
             valid_size (sequence or None, optional, default=None): Valid patch size, used for restore. If `None`, as
                 same as `patch_size`.
         """
-
         self.patch_size = np.asarray(patch_size, dtype=np.uint32)
         self.valid_size = np.asarray(valid_size, dtype=np.uint32) if valid_size is not None else self.patch_size
         assert len(self.patch_size.shape) == len(self.valid_size.shape)
@@ -54,7 +53,6 @@ class GridSampler:
                 of restored array can differ from the data which was divided as long as keeping the same image
                 dimensions. If None, as same as `self.full_size`.
         """
-
         patches = list(map(lambda x: self._shrink_shape(x), patches))
         if not restore_shape:
             restore_shape = self.full_size
@@ -70,7 +68,6 @@ class GridSampler:
         Returns:
 
         """
-
         if (self.patch_size == self.valid_size).all():
             return data
         center = [e // 2 if e % 2 != 0 else e // 2 - 1 for e in self.valid_size]

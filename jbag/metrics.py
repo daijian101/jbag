@@ -10,7 +10,6 @@ def sdf(input, normalize=False):
         input (numpy.ndarray or torch.Tensor): Input data ndarray or tensor.
         normalize (bool, optional, default=False): If True, perform max-min normalization for SDF.
     """
-
     pos_distance = distance_transform_edt(input)
     neg_segmentation = ~input
     neg_distance = distance_transform_edt(neg_segmentation)

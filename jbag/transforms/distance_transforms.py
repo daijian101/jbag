@@ -11,7 +11,6 @@ class SDF(Transform):
             keys (str or sequence): Binary segmentation for computing SDF.
             normalize (bool): If `True`, normalize the SDF by min-max normalization.
         """
-
         super().__init__(keys)
         self.normalize = normalize
 

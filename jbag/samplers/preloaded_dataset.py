@@ -25,7 +25,6 @@ class PreloadedDataset(ABC):
             shuffle (bool, optional, default=True): If `True`, shuffle the samples.
             transforms (torchvision.transforms.Compose or None):
         """
-
         if shuffle:
             random.shuffle(samples)
         self.sample_iterator = cycle(samples)
@@ -54,7 +53,6 @@ class PreloadedDataset(ABC):
         Returns:
 
         """
-
         sample_idx = next(self.sample_iterator)
 
         if self.sample_queue[pos] and self.sample_queue[pos][0] == sample_idx:
@@ -81,7 +79,6 @@ class PreloadedDataset(ABC):
         Returns:
 
         """
-
         ...
 
     @abstractmethod

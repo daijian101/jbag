@@ -39,7 +39,6 @@ def replace_str(key, node, root, list_index=None):
     Returns:
 
     """
-
     reference_patten = r'(\$\{.+?\})'
     reference_key_patten = r'\$\{(.+)\}'
     if list_index is not None:
@@ -72,7 +71,6 @@ def get_node_key(key, node, root):
     Returns:
 
     """
-
     node_hierarchy = key.split('.')
     # first, search on current node
     # second, search on root if search failed on current node

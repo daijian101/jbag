@@ -20,7 +20,6 @@ class WeightedPatchPicker:
             patch_size (sequence):
             coordinates (CoordinateGenerator):
         """
-
         self.data = data
         self.patch_size = patch_size
         self.index = 0
