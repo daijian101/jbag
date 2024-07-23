@@ -38,3 +38,7 @@ class MetricSummary:
 
     def count(self):
         return len(self.__evaluations)
+
+    @property
+    def evaluations(self):
+        return self.__evaluations
