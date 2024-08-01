@@ -268,7 +268,7 @@ def save_excel(output_file, data: Union[dict, pd.DataFrame], sheet_name: str = '
     write_mode = 'a' if append else 'w'
 
     if write_mode == 'a' and not os.path.exists(output_file):
-        logger.warning(f'Append to existing file while the file does not exist: {output_file}, use write mode instead.')
+        logger.warning(f'Try to append data to a non-existing file: {output_file}, change mode to write instead.')
         write_mode = 'w'
 
     if write_mode == 'a' and overlay_sheet:
