@@ -18,5 +18,4 @@ def overlay(image, label_map, color_map: Union[list, tuple] = None, opacity=0.5)
     else:
         overlaid_image = sitk.LabelOverlay(image, label_map, opacity=opacity)
     overlaid_image = sitk.GetArrayFromImage(overlaid_image)
-    overlaid_image = np.transpose(overlaid_image, (2, 0, 1))
     return overlaid_image
