@@ -1,3 +1,5 @@
+from typing import Union
+
 import matplotlib.pyplot as plt
 import torch
 
@@ -8,7 +10,7 @@ from jbag.transforms.transforms import RandomTransform
 class GaussianNoiseTransform(RandomTransform):
     def __init__(self, keys,
                  apply_probability,
-                 noise_variance=(0, 0.1),
+                 noise_variance=Union[tuple[float, float], list[float, float]],
                  synchronize_channels: bool = False,
                  p_per_channel: float = 1):
         """
@@ -16,7 +18,7 @@ class GaussianNoiseTransform(RandomTransform):
         Args:
             keys (str or sequence):
             apply_probability (float):
-            noise_variance (float or list[2] or tuple [2], optional, default=(0, 0,1)): if this parameter is sequence, the sigma of Gaussian function is uniformly sampled from [sequence[0], sequence[1]).
+            noise_variance (tuple[float, float], list[float, float]): Range of noise variance.
             synchronize_channels (bool, optional, default=False): If True, use the same parameters for generating Gaussian noise.
             p_per_channel (float, optional, default=1): Probability of applying Gaussian noise for each channel.
         """
@@ -46,17 +48,13 @@ class GaussianNoiseTransform(RandomTransform):
 if __name__ == '__main__':
     image = torch.zeros((512, 512), dtype=torch.float)
     image = image[None]
-    data = {'image': image, 'image1': image.clone()}
+    data = {'image': image}
 
-    t = GaussianNoiseTransform(keys=['image', 'image1'], apply_probability=1, noise_variance=0.15,
+    t = GaussianNoiseTransform(keys=['image'], apply_probability=1, noise_variance=0.15,
                               synchronize_channels=False, p_per_channel=1)
 
     data = t(data)
     image = data['image'][0].numpy()
-    image1 = data['image1'][0].numpy()
     image = (image - image.min()) / (image.max() - image.min())
-    image1 = (image1 - image1.min()) / (image1.max() - image1.min())
     plt.imshow(image, cmap='gray')
-    plt.show()
-    plt.imshow(image1, cmap='gray')
     plt.show()

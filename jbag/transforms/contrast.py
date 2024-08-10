@@ -1,3 +1,5 @@
+from typing import Union
+
 from jbag.transforms._utils import get_non_one_scalar
 from jbag.transforms.transforms import RandomTransform
 import torch
@@ -6,7 +8,7 @@ import torch
 class ContrastTransform(RandomTransform):
     def __init__(self, keys,
                  apply_probability,
-                 contrast_range,
+                 contrast_range:Union[tuple[float, float], list[float, float]],
                  preserve_range: bool,
                  synchronize_channels: bool = False,
                  p_per_channel: float = 1):
@@ -15,7 +17,7 @@ class ContrastTransform(RandomTransform):
         Args:
             keys (str or sequence):
             apply_probability (float):
-            contrast_range (list[2] or tuple [2]): Multiplier for contrast adjustment is sampled from this range without value of `1` if `1` is in range.
+            contrast_range (tuple[float, float], list[float, float]): Multiplier for contrast adjustment is sampled from this range without value of `1` if `1` is in range.
             preserve_range (bool): If True, preserve the intensity range of the original image.
             synchronize_channels (bool, optional, default=False): if True, use the same parameters for all channels.
             p_per_channel (float, optional, default=1): Probability of applying transform to each channel.
@@ -59,20 +61,15 @@ if __name__ == '__main__':
     image = read_cavass_file('/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')
     image = image[None].astype(np.float64)
     image = torch.from_numpy(image)
-    data = {'image': image, 'image1': image.clone()}
+    data = {'image': image}
 
-    t = ContrastTransform(keys=['image', 'image1'], apply_probability=1,contrast_range=(1, 1.5), preserve_range=True, synchronize_channels=False,  p_per_channel=1)
+    t = ContrastTransform(keys=['image'], apply_probability=1,contrast_range=(1, 2), preserve_range=True, synchronize_channels=False,  p_per_channel=1)
 
     data = t(data)
 
     image = data['image'][0]
-    image1 = data['image1'][0]
-
     image = image.numpy()
-    image1 = image1.numpy()
     save_cavass_file('/data1/dj/tmp/image.IM0', image.astype(np.uint16),
-                     reference_file='/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')
-    save_cavass_file('/data1/dj/tmp/image1.IM0', image1.astype(np.uint16),
                      reference_file='/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')
 
 

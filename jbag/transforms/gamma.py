@@ -1,4 +1,5 @@
 import time
+from typing import Union
 
 import torch
 
@@ -9,19 +10,21 @@ from jbag.transforms.transforms import RandomTransform
 class GammaTransform(RandomTransform):
     def __init__(self, keys,
                  apply_probability,
-                 gamma,
-                 p_invert_image,
+                 gamma: Union[tuple[float, float], list[float, float]],
+                 p_invert_image: float,
                  synchronize_channels: bool = False,
                  p_per_channel: float = 1,
                  p_retain_stats: float = 1, ):
         """
-        Brightness transform.
+        Gamma transform.
         Args:
             keys (str or sequence):
             apply_probability (float):
-            multiplier_range (list[2] or tuple [2]): Multiplier for brightness adjustment is sampled from this range without value of `1` if `1` is in range.
+            gamma (tuple[float, float], list[float, float]): Range for gamma value.
+            p_invert_image(float): Probability of inverting output image.
             synchronize_channels (bool, optional, default=False): If True, use the same parameters for all channels.
             p_per_channel (float, optional, default=1): Probability of applying transform to each channel.
+            p_retain_stats (float, optional, default=1): Probability of retaining data statistics.
         """
         assert len(gamma) == 2 and gamma[1] >= gamma[0]
         super().__init__(keys, apply_probability)
@@ -43,7 +46,6 @@ class GammaTransform(RandomTransform):
             gamma = [get_non_one_scalar(self.gamma) for _ in range(len(apply_to_channel))]
 
         print(gamma)
-        start = time.time()
         for c, r, i, g in zip(apply_to_channel, retain_stats, invert_images, gamma):
             value = data[self.keys[c]]
             if i:
@@ -70,28 +72,6 @@ if __name__ == '__main__':
     # from cavass.ops import read_cavass_file, save_cavass_file
     import numpy as np
     import matplotlib.pyplot as plt
-    #
-    # image = read_cavass_file('/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')
-    # image = image[None].astype(np.float64)
-    # print(image.sum())
-    # image = torch.from_numpy(image)
-    # data = {'image': image, 'image1': image.clone()}
-    #
-    # gbt = GammaTransform(keys=['image', 'image1'], apply_probability=1, gamma=(1, 10),
-    #                      p_invert_image=1, synchronize_channels=False,
-    #                      p_per_channel=1, p_retain_stats=1)
-    # data = gbt(data)
-    #
-    # image = data['image'][0]
-    # image1 = data['image1'][0]
-    # image = image.numpy()
-    # image1 = image1.numpy()
-    # print(image.sum())
-    # print(image1.sum())
-    # save_cavass_file('/data1/dj/tmp/image.IM0', image.astype(np.uint16),
-    #                  reference_file='/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')
-    # save_cavass_file('/data1/dj/tmp/image1.IM0', image1.astype(np.uint16),
-    #                  reference_file='/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')
     from skimage.data import camera
 
     image = camera()

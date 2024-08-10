@@ -1,3 +1,5 @@
+from typing import Union
+
 from jbag.transforms._utils import get_non_one_scalar
 from jbag.transforms.transforms import RandomTransform
 import torch
@@ -6,7 +8,7 @@ import torch
 class MultiplicativeBrightnessTransform(RandomTransform):
     def __init__(self, keys,
                  apply_probability,
-                 multiplier_range,
+                 multiplier_range: Union[tuple[float, float], list[float, float]],
                  synchronize_channels: bool = False,
                  p_per_channel: float = 1):
         """
@@ -14,7 +16,7 @@ class MultiplicativeBrightnessTransform(RandomTransform):
         Args:
             keys (str or sequence):
             apply_probability (float):
-            multiplier_range (list[2] or tuple [2]): Multiplier for brightness adjustment is sampled from this range without value of `1` if `1` is in range.
+            multiplier_range (tuple[float, float] or list[float, float]): Multiplier for brightness adjustment is sampled from this range without value of `1` if `1` is in range.
             synchronize_channels (bool, optional, default=False): If True, use the same parameters for all channels.
             p_per_channel (float, optional, default=1): Probability of applying transform to each channel.
         """
@@ -41,22 +43,19 @@ class MultiplicativeBrightnessTransform(RandomTransform):
 
 
 if __name__ == '__main__':
-    from cavass.ops import read_cavass_file, save_cavass_file
     import numpy as np
+    from cavass.ops import read_cavass_file, save_cavass_file
 
     image = read_cavass_file('/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')
     image = image[None].astype(np.float64)
     image = torch.from_numpy(image)
-    data = {'image': image, 'image1': image.clone()}
+    data = {'image': image}
 
-    gbt = MultiplicativeBrightnessTransform(keys=['image', 'image1'], apply_probability=1, p_per_channel=0.5,
-                                            multiplier_range=(0.75, 1.25),
+    gbt = MultiplicativeBrightnessTransform(keys=['image'], apply_probability=1, p_per_channel=1,
+                                            multiplier_range=(0.5, 1),
                                             synchronize_channels=False)
     data = gbt(data)
 
     image = data['image'][0].numpy()
-    image1 = data['image1'][0].numpy()
     save_cavass_file('/data1/dj/tmp/image.IM0', image.astype(np.uint16),
-                     reference_file='/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')
-    save_cavass_file('/data1/dj/tmp/image1.IM0', image1.astype(np.uint16),
                      reference_file='/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')

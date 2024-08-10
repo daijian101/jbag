@@ -9,7 +9,7 @@ class MirrorTransform(RandomTransform):
                  allowed_axes,
                  p_per_axes: float = 0.5):
         """
-        Brightness transform.
+        Mirror transform.
         Args:
             keys (str or sequence):
             apply_probability (float):
@@ -25,7 +25,6 @@ class MirrorTransform(RandomTransform):
 
     def _call_fun(self, data):
         allowed_axes = [axis for axis in self.allowed_axes if torch.rand(1) < self.p_per_axes]
-        print(allowed_axes)
         if len(allowed_axes) == 0:
             return data
         for key in self.keys:
@@ -42,14 +41,11 @@ if __name__ == '__main__':
     image = read_cavass_file('/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')
     image = image[None].astype(np.float64)
     image = torch.from_numpy(image)
-    data = {'image': image, 'image1': image.clone()}
+    data = {'image': image}
 
-    gbt = MirrorTransform(keys=['image', 'image1'], apply_probability=1, allowed_axes=[1,2], p_per_axes=1)
+    gbt = MirrorTransform(keys=['image'], apply_probability=1, allowed_axes=[1], p_per_axes=1)
     data = gbt(data)
 
     image = data['image'][0].numpy()
-    image1 = data['image1'][0].numpy()
     save_cavass_file('/data1/dj/tmp/image.IM0', image.astype(np.uint16),
-                     reference_file='/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')
-    save_cavass_file('/data1/dj/tmp/image1.IM0', image1.astype(np.uint16),
                      reference_file='/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')

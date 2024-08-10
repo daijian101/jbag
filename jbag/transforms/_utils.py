@@ -34,3 +34,12 @@ def get_non_one_scalar(scalar_range):
             else:
                 scalar = np.random.uniform(max(scalar_range[0], 1), scalar_range[1])
     return scalar
+
+
+def get_max_spatial_dims(keys, valid_keys, data):
+    max_spatial_dims = 0
+    for c in valid_keys:
+        value = data[keys[c]]
+        spatial_dims = len(value.shape) - 1
+        max_spatial_dims = max(max_spatial_dims, spatial_dims)
+    return max_spatial_dims

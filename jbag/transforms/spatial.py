@@ -27,7 +27,7 @@ class SpatialTransform(RandomTransform):
                  elastic_deform_magnitude: Union[float, list[float, float], tuple[float, float]] = (0, 0.2),
                  ):
         """
-        Brightness transform.
+        Spatial affine transform.
         Args:
             keys (str or sequence):
             apply_probability (float):
@@ -60,7 +60,9 @@ class SpatialTransform(RandomTransform):
         self.p_elastic_deform = p_elastic_deform
         self.random_crop = random_crop
         if isinstance(interpolation_modes, str):
-            self.interpolation_modes = [interpolation_modes] * len(self.keys)
+            interpolation_modes = [interpolation_modes] * len(self.keys)
+
+        self.interpolation_modes = interpolation_modes
 
         self.rotation_angle_range = rotation_angle_range
         self.scaling = scaling_range
@@ -167,11 +169,9 @@ class SpatialTransform(RandomTransform):
                 value = value.to(torch.float32)
             # check if affine transform is needed
             if do_grid_sampling:
-                print("do grid sampling")
                 value = grid_sample(value[None], grid[None], mode=self.interpolation_modes[i], padding_mode='zeros',
                                     align_corners=False).to(dtype)[0]
             else:
-                print("do central crop")
                 if patch_size != original_spatial_shape:
                     value = central_crop(value, center_location, self.patch_size)
             data[key] = value
@@ -227,43 +227,32 @@ def create_affine_matrix_2d(rotation_angle, scaling_factors):
 
 
 if __name__ == '__main__':
-    from cavass.ops import read_cavass_file
+    from cavass.ops import read_cavass_file, save_cavass_file
     from jbag.image import overlay
     from cavass.window_transform import cavass_soft_tissue_window
     import numpy as np
     import matplotlib.pyplot as plt
 
-    image = read_cavass_file('/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')[..., 150]
+    image = read_cavass_file('/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')
     image = image[None].astype(np.float32)
     image = torch.from_numpy(image)
 
-    smt = read_cavass_file('/data1/dj/data/bca/cavass_data/SMT/N007PETCT.BIM')[..., 150]
+    smt = read_cavass_file('/data1/dj/data/bca/cavass_data/SMT/N007PETCT.BIM')
     smt = smt[None].astype(bool)
     smt = torch.from_numpy(smt)
     data = {'image': image, 'smt': smt}
 
     st = SpatialTransform(keys=['image', 'smt'], apply_probability=1, p_rotation=1, p_scaling=1, p_elastic_deform=0,
                           rotation_angle_range=(-np.pi, np.pi),
-                          scaling_range=(0.5, 1),
-                          patch_size=[512, 512], random_crop=False)
+                          scaling_range=(0.7, 1.4), random_crop=False, interpolation_modes=['bilinear', 'nearest'])
     data = st(data)
 
     image = data['image'][0].numpy()
     smt = data['smt'][0].numpy()
-    smt = smt.astype(np.uint8)
+    smt = smt.astype(bool)
 
-    image = cavass_soft_tissue_window(image)
-    image = overlay(image, smt)
-    image = image.transpose((1, 2, 0))
-
-    plt.imshow(image)
-    plt.show()
     #
-    # save_cavass_file('/data1/dj/tmp/image.IM0', image.astype(np.uint16),
-    #                  reference_file='/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')
+    save_cavass_file('/data1/dj/tmp/image.IM0', image.astype(np.uint16),
+                     reference_file='/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')
 
-    # save_cavass_file('/data1/dj/tmp/image.IM0', image.astype(np.uint16))
-
-    st = SpatialTransform(keys=['image'], apply_probability=1, patch_size=(512, 512), patch_center_dist_from_border=0,
-                          random_crop=False, p_elastic_deform=0, p_rotation=0.2, rotation_angle_range=(-np.pi, np.pi),
-                          p_scaling=0.2, scaling_range=(0.7, 1.4), p_synchronize_scaling_across_axes=1)
+    save_cavass_file('/data1/dj/tmp/SMT.BIM', smt, True, reference_file='/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')
