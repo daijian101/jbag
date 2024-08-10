@@ -6,7 +6,11 @@ from pathlib import Path
 from typing import Union
 
 import numpy as np
+import pandas as pd
 from numpy.lib.format import dtype_to_descr, descr_to_dtype
+from openpyxl import load_workbook
+
+from jbag import logger
 
 
 def read_mat(input_file, key='scene'):
@@ -236,3 +240,55 @@ def scp(dst_user, dst_host, dst_path, local_path, dst_port=None, recursive=False
     else:
         cmd += f' {dst} {local_path}'
     os.system(cmd)
+
+
+def save_excel(output_file, data: Union[dict, pd.DataFrame], sheet_name: str = 'Sheet1', append: bool = False, overlay_sheet: bool=False,
+               column_width: int = None, auto_adjust_width: bool = False, index=False):
+    """
+    Save data to Excel file.
+    Args:
+        output_file (str):
+        data (dict | pd.DataFrame):
+        sheet_name (str, optional, default='Sheet1'):
+        append (bool, optional, default=False): If True, append to existing file.
+        overlay_sheet (bool, optional, default=False): If True, overwrite existing sheet. Note that this option only works for appending mode.
+        column_width (int, optional, default=None): Set column width to the given value, if exist.
+        auto_adjust_width (bool, optional, default=False): If True, adjust column width according to the content length.
+        index (bool, optional, default=False): If True, set index column on the work sheet.
+
+    Returns:
+
+    """
+    write_mode = 'a' if append else 'w'
+
+    if write_mode == 'a' and not os.path.exists(output_file):
+        logger.warning(f'Try to append data to a non-existing file: {output_file}, change mode to write instead.')
+        write_mode = 'w'
+
+    if write_mode == 'a' and overlay_sheet:
+        if_sheet_exists = 'overlay'
+    else:
+        if_sheet_exists = None
+
+    if isinstance(data, dict):
+        data = pd.DataFrame(data)
+
+    with pd.ExcelWriter(output_file, engine='openpyxl', mode=write_mode, if_sheet_exists=if_sheet_exists) as writer:
+        data.to_excel(writer, sheet_name=sheet_name, index=index)
+
+    if column_width is not None or auto_adjust_width:
+        book = load_workbook(output_file)
+        worksheet = book[sheet_name]
+
+        for column_cells in worksheet.columns:
+            if column_width is not None:
+                width = column_width
+            else:
+                max_length = max(len(str(cell.value)) for cell in column_cells)
+                width = max_length + 5
+
+            column_letter = column_cells[0].column_letter
+            worksheet.column_dimensions[column_letter].width = width
+
+        # Save the workbook
+        book.save(output_file)
