@@ -50,7 +50,7 @@ class ContrastTransform(RandomTransform):
             value += mean_intensity
             if self.preserve_range:
                 value.clamp_(min_intensity, max_intensity)
-            self.keys[c] = value
+            data[self.keys[c]] = value
         return data
 
 
