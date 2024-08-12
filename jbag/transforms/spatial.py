@@ -16,7 +16,7 @@ class SpatialTransform(RandomTransform):
                  patch_size=None,
                  patch_center_dist_from_border: Union[int, list[int], tuple[int]] = 0,
                  random_crop: bool = False,
-                 interpolation_modes: Union[str, list[str, ...], tuple[str, ...]] = 'nearest',
+                 interpolation_modes: Union[str, list[str], tuple[str]] = 'nearest',
                  p_rotation: float = 0.0,
                  rotation_angle_range: Union[float, list[float, float], tuple[float, float]] = (0, 2 * np.pi),
                  p_scaling: float = 0.0,

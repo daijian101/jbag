@@ -10,7 +10,7 @@ from jbag.transforms.transforms import RandomTransform
 class GammaTransform(RandomTransform):
     def __init__(self, keys,
                  apply_probability,
-                 gamma: Union[tuple[float, float], list[float, float]],
+                 gamma: Union[tuple[float], list[float]],
                  p_invert_image: float,
                  synchronize_channels: bool = False,
                  p_per_channel: float = 1,
@@ -20,7 +20,7 @@ class GammaTransform(RandomTransform):
         Args:
             keys (str or sequence):
             apply_probability (float):
-            gamma (tuple[float, float], list[float, float]): Range for gamma value.
+            gamma (sequence): Range for gamma value.
             p_invert_image(float): Probability of inverting output image.
             synchronize_channels (bool, optional, default=False): If True, use the same parameters for all channels.
             p_per_channel (float, optional, default=1): Probability of applying transform to each channel.

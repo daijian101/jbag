@@ -10,7 +10,7 @@ from jbag.transforms.transforms import RandomTransform
 class GaussianNoiseTransform(RandomTransform):
     def __init__(self, keys,
                  apply_probability,
-                 noise_variance=Union[tuple[float, float], list[float, float]],
+                 noise_variance=Union[tuple[float], list[float]],
                  synchronize_channels: bool = False,
                  p_per_channel: float = 1):
         """
@@ -18,7 +18,7 @@ class GaussianNoiseTransform(RandomTransform):
         Args:
             keys (str or sequence):
             apply_probability (float):
-            noise_variance (tuple[float, float], list[float, float]): Range of noise variance.
+            noise_variance (sequence): Range of noise variance.
             synchronize_channels (bool, optional, default=False): If True, use the same parameters for generating Gaussian noise.
             p_per_channel (float, optional, default=1): Probability of applying Gaussian noise for each channel.
         """

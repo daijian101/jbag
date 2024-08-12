@@ -8,7 +8,7 @@ import torch
 class ContrastTransform(RandomTransform):
     def __init__(self, keys,
                  apply_probability,
-                 contrast_range:Union[tuple[float, float], list[float, float]],
+                 contrast_range:Union[tuple[float], list[float]],
                  preserve_range: bool,
                  synchronize_channels: bool = False,
                  p_per_channel: float = 1):
@@ -17,7 +17,7 @@ class ContrastTransform(RandomTransform):
         Args:
             keys (str or sequence):
             apply_probability (float):
-            contrast_range (tuple[float, float], list[float, float]): Multiplier for contrast adjustment is sampled from this range without value of `1` if `1` is in range.
+            contrast_range (sequence): Multiplier for contrast adjustment is sampled from this range without value of `1` if `1` is in range.
             preserve_range (bool): If True, preserve the intensity range of the original image.
             synchronize_channels (bool, optional, default=False): if True, use the same parameters for all channels.
             p_per_channel (float, optional, default=1): Probability of applying transform to each channel.

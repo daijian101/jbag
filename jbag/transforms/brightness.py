@@ -8,7 +8,7 @@ import torch
 class MultiplicativeBrightnessTransform(RandomTransform):
     def __init__(self, keys,
                  apply_probability,
-                 multiplier_range: Union[tuple[float, float], list[float, float]],
+                 multiplier_range: Union[tuple[float], list[float]],
                  synchronize_channels: bool = False,
                  p_per_channel: float = 1):
         """
@@ -16,7 +16,7 @@ class MultiplicativeBrightnessTransform(RandomTransform):
         Args:
             keys (str or sequence):
             apply_probability (float):
-            multiplier_range (tuple[float, float] or list[float, float]): Multiplier for brightness adjustment is sampled from this range without value of `1` if `1` is in range.
+            multiplier_range (sequence): Multiplier for brightness adjustment is sampled from this range without value of `1` if `1` is in range.
             synchronize_channels (bool, optional, default=False): If True, use the same parameters for all channels.
             p_per_channel (float, optional, default=1): Probability of applying transform to each channel.
         """

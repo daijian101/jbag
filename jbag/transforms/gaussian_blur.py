@@ -10,7 +10,7 @@ from jbag.transforms.transforms import RandomTransform
 class GaussianBlurTransform(RandomTransform):
     def __init__(self, keys,
                  apply_probability,
-                 blur_sigma=Union[tuple[float, float], list[float, float]],
+                 blur_sigma=Union[tuple[float], list[float]],
                  synchronize_channels: bool = False,
                  synchronize_axes: bool = False,
                  p_per_channel: float = 1):
@@ -19,7 +19,7 @@ class GaussianBlurTransform(RandomTransform):
         Args:
             keys (str or sequence):
             apply_probability (float):
-            blur_sigma (tuple[float, float], list[float, float]): Sigma for Gaussian blur. If sequence with two elements, Gaussian blur sigma is uniformly sampled from [blur_sigma[0], blur_sigma[1]).
+            blur_sigma (sequence): Sigma for Gaussian blur. If sequence with two elements, Gaussian blur sigma is uniformly sampled from [blur_sigma[0], blur_sigma[1]).
             synchronize_channels (bool, optional, default=False): If True, use the same parameters for all channels.
             synchronize_axes (bool, optional, default=False): If True, use the same parameters for all axes of an image.
             p_per_channel (float, optional, default=1): Probability of applying transform to each channel.

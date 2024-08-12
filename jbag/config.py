@@ -83,7 +83,7 @@ def get_node_key(key, node, root):
     node, unpacked_key = search_node(node_hierarchy, node)
     if node and unpacked_key:
         return node, unpacked_key
-    raise ValueError(f'config doesn\'t contain key: {key}')
+    raise ValueError(f'Config does not contain key: {key}')
 
 
 def search_node(node_hierarchy, node):
