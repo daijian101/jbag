@@ -243,7 +243,7 @@ if __name__ == '__main__':
     data = {'image': image, 'smt': smt}
 
     st = SpatialTransform(keys=['image', 'smt'], apply_probability=1, p_rotation=1, p_scaling=1, p_elastic_deform=0,
-                          rotation_angle_range=(-np.pi, np.pi),
+                          rotation_angle_range=[-np.pi, np.pi],
                           scaling_range=(0.7, 1.4), random_crop=False, interpolation_modes=['bilinear', 'nearest'])
     data = st(data)
 

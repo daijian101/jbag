@@ -2,7 +2,7 @@ import numpy as np
 
 
 def get_scalar(scalar_type):
-    if isinstance(scalar_type, tuple or list):
+    if isinstance(scalar_type, (list, tuple)):
         assert scalar_type[1] >= scalar_type[0]
         if scalar_type[0] == scalar_type[1]:
             scalar = scalar_type[0]
