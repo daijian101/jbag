@@ -164,11 +164,11 @@ class SpatialTransform(RandomTransform):
 
         for i, key in enumerate(self.keys):
             value = data[key]
-            dtype = value.dtype
-            if dtype is not torch.float32:
-                value = value.to(torch.float32)
             # check if affine transform is needed
             if do_grid_sampling:
+                dtype = value.dtype
+                if dtype is not torch.float32:
+                    value = value.to(torch.float32)
                 value = grid_sample(value[None], grid[None], mode=self.interpolation_modes[i], padding_mode='zeros',
                                     align_corners=False).to(dtype)[0]
             else:
