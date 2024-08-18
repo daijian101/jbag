@@ -1,9 +1,14 @@
+from functools import partial
 from typing import Union, Type
 
 import torch
 import torch.nn as nn
+from lazyConfig import Config
 from torch.nn.modules.conv import _ConvNd
 from torch.nn.modules.dropout import _DropoutNd
+
+from jbag import logger
+from jbag.models.utils import get_conv_op, get_norm_op, get_non_linear_op
 
 
 class UNet(nn.Module):
@@ -383,3 +388,45 @@ def get_conv_dimensions(conv_op: Type[_ConvNd]):
             return 3
         case _:
             raise ValueError(f'Unknown conv op {conv_op}')
+
+
+def build_unet(cfg: Config):
+    conv_op = get_conv_op(cfg.conv_dim)
+    norm_op = get_norm_op(cfg.norm_op, cfg.conv_dim)
+    non_linear_op = get_non_linear_op(cfg.non_linear)
+
+    params = {'input_channels': cfg.input_channels,
+              'num_classes': cfg.num_classes,
+              'num_stages': cfg.num_stages,
+              'num_features_per_stage': cfg.num_features_per_stage.as_primitive(),
+              'conv_op': conv_op,
+              'kernel_sizes': cfg.kernel_sizes.as_primitive(),
+              'strides': cfg.strides.as_primitive(),
+              'num_conv_per_stage_encoder': cfg.num_conv_per_stage_encoder.as_primitive(),
+              'num_conv_per_stage_decoder': cfg.num_conv_per_stage_decoder.as_primitive(),
+              'conv_bias': cfg.conv_bias,
+              'norm_op': norm_op,
+              'norm_op_kwargs': cfg.norm_op_kwargs,
+              'non_linear': non_linear_op,
+              'non_linear_kwargs': cfg.non_linear_kwargs,
+              'deep_supervision': cfg.deep_supervision,
+              'non_linear_first': cfg.non_linear_first,
+              }
+    network = UNet(**params)
+
+    allow_init = False
+    network_initialization_params = None
+    if 'initialization' in cfg and 'allow_init' in cfg.initialization:
+        allow_init = cfg.initialization.allow_init
+
+    if allow_init:
+        if 'params' in cfg.initialization:
+            network_initialization_params = cfg.initialization.params.as_primitive()
+        else:
+            logger.warning('No initialization parameters were provided for network weight initialization.')
+
+    if allow_init and hasattr(network, 'initialize'):
+        init_fn = partial(network.initialize, **network_initialization_params)
+        network.apply(init_fn)
+
+    return network
