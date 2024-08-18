@@ -45,7 +45,6 @@ class GammaTransform(RandomTransform):
         else:
             gamma = [get_non_one_scalar(self.gamma) for _ in range(len(apply_to_channel))]
 
-        print(gamma)
         for c, r, i, g in zip(apply_to_channel, retain_stats, invert_images, gamma):
             value = data[self.keys[c]]
             if i:
