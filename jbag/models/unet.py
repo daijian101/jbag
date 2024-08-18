@@ -1,105 +1,385 @@
+from typing import Union, Type
+
 import torch
-import torch.nn.functional as F
-from torch import nn
-
-
-class DoubleConv(nn.Sequential):
-    def __init__(self, in_channels, out_channels, mid_channels=None):
-        super().__init__()
-        if not mid_channels:
-            mid_channels = out_channels
-
-        conv1 = nn.Conv2d(in_channels=in_channels, out_channels=mid_channels, kernel_size=3, padding=1)
-        bn1 = nn.BatchNorm2d(num_features=mid_channels)
-        relu1 = nn.ReLU(inplace=True)
-        conv2 = nn.Conv2d(in_channels=mid_channels, out_channels=out_channels, kernel_size=3, padding=1)
-        bn2 = nn.BatchNorm2d(num_features=out_channels)
-        relu2 = nn.ReLU(inplace=True)
-        super().__init__(conv1, bn1, relu1, conv2, bn2, relu2)
-
-
-class UNetEncoder(nn.Module):
-    def __init__(self, in_channels=1, width_factor=64, blocks=5):
-        super().__init__()
-        channels = [width_factor << i for i in range(blocks)]
-
-        block_0 = DoubleConv(in_channels=in_channels, out_channels=channels[0])
-        self.blocks = nn.ModuleList([
-            nn.Sequential(nn.MaxPool2d(2), DoubleConv(in_channels=channels[i - 1], out_channels=channels[i]))
-            for i in range(1, blocks)])
-
-        self.blocks.insert(0, block_0)
-        self.out_channels = channels
-
-    def forward(self, x):
-        features = []
-        for block in self.blocks:
-            x = block(x)
-            features.append(x)
-        return features
-
-
-class UNetDecoder(nn.Module):
-    def __init__(self, encoder_channels):
-        super().__init__()
-
-        in_channels = encoder_channels[::-1]
-
-        self.blocks = nn.ModuleList([
-            Up(in_channels=in_channels[i], out_channels=in_channels[i + 1],
-               skip_conn_channels=in_channels[i + 1])
-            for i in range(0, len(in_channels) - 1)])
-
-        self.out_channels = in_channels[-1]
-
-    def forward(self, x):
-        skip_connections = x[-2::-1]
-        x = x[-1]
-        for i, skip_connection in enumerate(skip_connections):
-            x = self.blocks[i](x, skip_connection)
-        return x
-
-
-class Up(nn.Module):
-    def __init__(self, in_channels, out_channels, skip_conn_channels):
-        super().__init__()
-        self.up = nn.ConvTranspose2d(in_channels, in_channels // 2, kernel_size=2, stride=2)
-        self.conv = DoubleConv(in_channels // 2 + skip_conn_channels, out_channels)
-
-    def forward(self, x, skip_features):
-        x = self.up(x)
-        diff_y = skip_features.size()[2] - x.size()[2]
-        diff_x = skip_features.size()[3] - x.size()[3]
-        if diff_y != 0 or diff_x != 0:
-            x = F.pad(x, [diff_x // 2, diff_x - diff_x // 2,
-                          diff_y // 2, diff_y - diff_y // 2])
-
-        x = torch.cat([skip_features, x], dim=1)
-        return self.conv(x)
+import torch.nn as nn
+from torch.nn.modules.conv import _ConvNd
+from torch.nn.modules.dropout import _DropoutNd
 
 
 class UNet(nn.Module):
-    def __init__(self, in_channels=1, out_channels=1, width_factor=64, blocks=5, normalize=True):
-        """
-        UNet.
-
-        Args:
-            in_channels (int, optional, default=1):
-            out_channels (int, optional, default=1):
-            width_factor (int, optional, default=64):
-            blocks (int, optional, default=5):
-            normalize (bool, optional, default=True): If `True`, normalize the output using `torch.sigmoid` for one
-                dimension output, or `torch.softmax` for multiple classes output.
-        """
+    def __init__(self, input_channels: int,
+                 num_classes: int,
+                 num_stages: int,
+                 num_features_per_stage: Union[int, list[int, ...], tuple[int, ...]],
+                 conv_op: Type[_ConvNd],
+                 kernel_sizes: Union[int, list[int, ...], tuple[int, ...]],
+                 strides: Union[int, list[int, ...], tuple[int, ...]],
+                 num_conv_per_stage_encoder: Union[int, list[int, ...], tuple[int, ...]],
+                 num_conv_per_stage_decoder: Union[int, list[int, ...], tuple[int, ...]],
+                 conv_bias: bool = False,
+                 norm_op: Union[None, Type[nn.Module]] = None,
+                 norm_op_kwargs: dict = None,
+                 dropout_op: Union[None, Type[_DropoutNd]] = None,
+                 dropout_op_kwargs: dict = None,
+                 non_linear: Union[None, Type[nn.Module]] = None,
+                 non_linear_kwargs: dict = None,
+                 deep_supervision: bool = False,
+                 non_linear_first: bool = False
+                 ):
         super().__init__()
-        self.out_channels = out_channels
-        encoder = UNetEncoder(in_channels=in_channels, width_factor=width_factor, blocks=blocks)
-        decoder = UNetDecoder(encoder_channels=encoder.out_channels)
-        decoder_head = nn.Conv2d(in_channels=decoder.out_channels, out_channels=out_channels, kernel_size=1)
-        self.unet = nn.Sequential(encoder,
-                                  decoder,
-                                  decoder_head)
+
+        if isinstance(num_conv_per_stage_encoder, int):
+            num_conv_per_stage_encoder = [num_conv_per_stage_encoder] * num_stages
+
+        if isinstance(num_conv_per_stage_decoder, int):
+            num_conv_per_stage_decoder = [num_conv_per_stage_decoder] * (num_stages - 1)
+
+        assert len(num_conv_per_stage_encoder) == num_stages
+        assert len(num_conv_per_stage_decoder) == num_stages - 1
+        self.encoder = Encoder(input_channels=input_channels,
+                               num_stages=num_stages,
+                               num_features_per_stage=num_features_per_stage,
+                               conv_op=conv_op,
+                               kernel_sizes=kernel_sizes,
+                               strides=strides,
+                               num_conv_per_stage=num_conv_per_stage_encoder,
+                               conv_bias=conv_bias,
+                               norm_op=norm_op,
+                               norm_op_kwargs=norm_op_kwargs,
+                               dropout_op=dropout_op,
+                               dropout_op_kwargs=dropout_op_kwargs,
+                               non_linear=non_linear,
+                               non_linear_kwargs=non_linear_kwargs,
+                               return_skips=True,
+                               non_linear_first=non_linear_first
+                               )
+        self.decoder = Decoder(num_classes=num_classes,
+                               encoder=self.encoder,
+                               num_conv_per_stage=num_conv_per_stage_decoder,
+                               deep_supervision=deep_supervision,
+                               non_linear_first=non_linear_first
+                               )
 
     def forward(self, x):
-        x = self.unet(x)
-        return x
+        skips = self.encoder(x)
+        return self.decoder(skips)
+
+    @staticmethod
+    def initialize(module, a=1e-2, nonlinearity='leaky_relu'):
+        """
+        kaiming initialization. a is set to 0.01 by default, this is only worked for LeakyReLU.
+        Args:
+            module (torch.nn.Module):
+            a (float, optional, default=1e-2): Set 0 for ReLu. Set 1e-2 for LeakyReLU.
+            nonlinearity (str, optional, default='leaky_relu'):
+
+        Returns:
+
+        """
+        if isinstance(module, (nn.Conv2d, nn.Conv3d, nn.ConvTranspose2d, nn.ConvTranspose3d)):
+            module.weight = nn.init.kaiming_normal_(module.weight, a=a, nonlinearity=nonlinearity)
+            if module.bias is not None:
+                module.bias = nn.init.constant_(module.bias, 0)
+
+
+class Encoder(nn.Module):
+    def __init__(self, input_channels: int,
+                 num_stages: int,
+                 num_features_per_stage: Union[int, list[int, ...], tuple[int, ...]],
+                 conv_op: Type[_ConvNd],
+                 kernel_sizes: Union[int, list[int, ...], tuple[int, ...]],
+                 strides: Union[int, list[int, ...], tuple[int, ...]],
+                 num_conv_per_stage: Union[int, list[int, ...], tuple[int, ...]],
+                 conv_bias: bool = False,
+                 norm_op: Union[None, Type[nn.Module]] = None,
+                 norm_op_kwargs: dict = None,
+                 dropout_op: Union[None, Type[_DropoutNd]] = None,
+                 dropout_op_kwargs: dict = None,
+                 non_linear: Union[None, Type[nn.Module]] = None,
+                 non_linear_kwargs: dict = None,
+                 return_skips: bool = False,
+                 non_linear_first: bool = False
+                 ):
+        super().__init__()
+        if isinstance(kernel_sizes, int):
+            kernel_sizes = [kernel_sizes] * num_stages
+        if isinstance(num_features_per_stage, int):
+            num_features_per_stage = [num_features_per_stage] * num_stages
+        if isinstance(num_conv_per_stage, int):
+            num_conv_per_stage = [num_conv_per_stage] * num_stages
+        if isinstance(strides, int):
+            strides = [strides] * num_stages
+
+        assert len(kernel_sizes) == num_stages
+        assert len(num_features_per_stage) == num_stages
+        assert len(num_conv_per_stage) == num_stages
+        assert len(strides) == num_stages
+
+        stages = []
+        for i in range(num_stages):
+            conv_stride = strides[i]
+            stages.append(StackedConvBlock(input_channels=input_channels,
+                                           output_channels=num_features_per_stage[i],
+                                           num_convs=num_conv_per_stage[i],
+                                           conv_op=conv_op,
+                                           kernel_size=kernel_sizes[i],
+                                           initial_stride=conv_stride,
+                                           conv_bias=conv_bias,
+                                           norm_op=norm_op,
+                                           norm_op_kwargs=norm_op_kwargs,
+                                           dropout_op=dropout_op,
+                                           dropout_op_kwargs=dropout_op_kwargs,
+                                           non_linear=non_linear,
+                                           non_linear_kwargs=non_linear_kwargs,
+                                           non_linear_first=non_linear_first
+                                           ))
+            input_channels = num_features_per_stage[i]
+
+        self.stages = nn.ModuleList(stages)
+        self.return_skips = return_skips
+        self.output_channels = num_features_per_stage
+        self.conv_op = conv_op
+        self.kernel_sizes = kernel_sizes
+        self.strides = strides
+        self.conv_bias = conv_bias
+        self.norm_op = norm_op
+        self.norm_op_kwargs = norm_op_kwargs
+        self.dropout_op = dropout_op
+        self.dropout_op_kwargs = dropout_op_kwargs
+        self.non_linear = non_linear
+        self.non_linear_kwargs = non_linear_kwargs
+
+    def forward(self, x):
+        ret = []
+        for layer in self.stages:
+            x = layer(x)
+            ret.append(x)
+        if self.return_skips:
+            return ret
+        else:
+            return ret[-1]
+
+
+class Decoder(nn.Module):
+    def __init__(self, num_classes: int,
+                 encoder: Encoder,
+                 num_conv_per_stage: Union[int, list[int, ...], tuple[int, ...]],
+                 deep_supervision: bool,
+                 norm_op: Union[None, Type[nn.Module]] = None,
+                 norm_op_kwargs: dict = None,
+                 dropout_op: Union[None, Type[_DropoutNd]] = None,
+                 dropout_op_kwargs: dict = None,
+                 non_linear: Union[None, Type[nn.Module]] = None,
+                 non_linear_kwargs: dict = None,
+                 conv_bias: bool = None,
+                 non_linear_first: bool = False
+                 ):
+        super().__init__()
+        self.deep_supervision = deep_supervision
+        num_stages_encoder = len(encoder.output_channels)
+        if isinstance(num_conv_per_stage, int):
+            num_conv_per_stage = [num_conv_per_stage] * (num_stages_encoder - 1)
+        assert len(num_conv_per_stage) == num_stages_encoder - 1
+        conv_transpose_op = get_matching_conv_transpose_op(encoder.conv_op)
+        conv_bias = encoder.conv_bias if conv_bias is None else conv_bias
+        norm_op = encoder.norm_op if norm_op is None else norm_op
+        norm_op_kwargs = encoder.norm_op_kwargs if norm_op_kwargs is None else norm_op_kwargs
+        dropout_op = encoder.dropout_op if dropout_op is None else dropout_op
+        dropout_op_kwargs = encoder.dropout_op_kwargs if dropout_op_kwargs is None else dropout_op_kwargs
+        non_linear = encoder.non_linear if non_linear is None else non_linear
+        non_linear_kwargs = encoder.non_linear_kwargs if non_linear_kwargs is None else non_linear_kwargs
+
+        stages = []
+        conv_transpose_ops = []
+        seg_layers = []
+        for i in range(1, num_stages_encoder):
+            input_features_below = encoder.output_channels[-i]
+            input_features_skip = encoder.output_channels[-(i + 1)]
+            stride_for_transpose_conv = encoder.strides[-i]
+            conv_transpose_ops.append(conv_transpose_op(input_features_below,
+                                                        input_features_skip,
+                                                        stride_for_transpose_conv,
+                                                        stride_for_transpose_conv,
+                                                        bias=conv_bias
+                                                        ))
+
+            stages.append(StackedConvBlock(
+                input_channels=2 * input_features_skip,
+                output_channels=input_features_skip,
+                num_convs=num_conv_per_stage[i - 1],
+                conv_op=encoder.conv_op,
+                kernel_size=encoder.kernel_sizes[-(i + 1)],
+                initial_stride=1,
+                conv_bias=conv_bias,
+                norm_op=norm_op,
+                norm_op_kwargs=norm_op_kwargs,
+                dropout_op=dropout_op,
+                dropout_op_kwargs=dropout_op_kwargs,
+                non_linear=non_linear,
+                non_linear_kwargs=non_linear_kwargs,
+                non_linear_first=non_linear_first
+            ))
+
+            seg_layers.append(
+                encoder.conv_op(input_features_skip, num_classes, kernel_size=1, stride=1, padding=0, bias=True))
+
+        self.stages = nn.ModuleList(stages)
+        self.conv_transpose_ops = nn.ModuleList(conv_transpose_ops)
+
+        # Deep supervision is added anywhere, even for deep_supervision = False.
+        # This allows load pre-trained parameters with and without deep supervision simultaneously.
+        self.seg_layers = nn.ModuleList(seg_layers)
+
+    def forward(self, skips):
+        low_resolution_features = skips[-1]
+        seg_outputs = []
+        for i in range(len(self.stages)):
+            x = self.conv_transpose_ops[i](low_resolution_features)
+            x = torch.cat((x, skips[-(i + 2)]), dim=1)
+            x = self.stages[i](x)
+            if self.deep_supervision:
+                seg_outputs.append(self.seg_layers[i](x))
+            elif i == (len(self.stages) - 1):
+                seg_outputs.append(self.seg_layers[-1](x))
+
+            low_resolution_features = x
+
+        seg_outputs = seg_outputs[::-1]
+
+        if not self.deep_supervision:
+            return seg_outputs[0]
+        else:
+            return seg_outputs
+
+
+class StackedConvBlock(nn.Sequential):
+    def __init__(self, input_channels: int,
+                 output_channels: int,
+                 num_convs: int,
+                 conv_op: Type[_ConvNd],
+                 kernel_size: Union[int, list[int, ...], tuple[int, ...]],
+                 initial_stride: Union[int, list[int, ...], tuple[int, ...]],
+                 conv_bias: bool = False,
+                 norm_op: Union[None, Type[nn.Module]] = None,
+                 norm_op_kwargs: dict = None,
+                 dropout_op: Union[None, Type[_DropoutNd]] = None,
+                 dropout_op_kwargs: dict = None,
+                 non_linear: Union[None, Type[nn.Module]] = None,
+                 non_linear_kwargs: dict = None,
+                 non_linear_first: bool = False
+                 ):
+        if not isinstance(output_channels, (list, tuple)):
+            output_channels = [output_channels] * num_convs
+
+        super().__init__(ConvDropoutNormReLU(input_channels=input_channels,
+                                             output_channels=output_channels[0],
+                                             conv_op=conv_op,
+                                             kernel_size=kernel_size,
+                                             stride=initial_stride,
+                                             conv_bias=conv_bias,
+                                             norm_op=norm_op,
+                                             norm_op_kwargs=norm_op_kwargs,
+                                             dropout_op=dropout_op,
+                                             dropout_op_kwargs=dropout_op_kwargs,
+                                             non_linear=non_linear,
+                                             non_linear_kwargs=non_linear_kwargs,
+                                             non_linear_first=non_linear_first),
+                         *[
+                             ConvDropoutNormReLU(input_channels=output_channels[i - 1],
+                                                 output_channels=output_channels[i],
+                                                 conv_op=conv_op,
+                                                 kernel_size=kernel_size,
+                                                 stride=1,
+                                                 conv_bias=conv_bias,
+                                                 norm_op=norm_op,
+                                                 norm_op_kwargs=norm_op_kwargs,
+                                                 dropout_op=dropout_op,
+                                                 dropout_op_kwargs=dropout_op_kwargs,
+                                                 non_linear=non_linear,
+                                                 non_linear_kwargs=non_linear_kwargs,
+                                                 non_linear_first=non_linear_first)
+                             for i in range(1, num_convs)
+                         ]
+                         )
+
+
+class ConvDropoutNormReLU(nn.Sequential):
+    def __init__(self,
+                 input_channels: int,
+                 output_channels: int,
+                 conv_op: Type[_ConvNd],
+                 kernel_size: Union[int, list[int, ...], tuple[int, ...]],
+                 stride: Union[int, list[int, ...], tuple[int, ...]],
+                 conv_bias: bool = False,
+                 norm_op: Union[None, Type[nn.Module]] = None,
+                 norm_op_kwargs: dict = None,
+                 dropout_op: Union[None, Type[_DropoutNd]] = None,
+                 dropout_op_kwargs: dict = None,
+                 non_linear: Union[None, Type[nn.Module]] = None,
+                 non_linear_kwargs: dict = None,
+                 non_linear_first: bool = False
+                 ):
+
+        if norm_op_kwargs is None:
+            norm_op_kwargs = {}
+        if non_linear_kwargs is None:
+            non_linear_kwargs = {}
+
+        ops = []
+
+        conv_dim = get_conv_dimensions(conv_op)
+        if not isinstance(kernel_size, (list, tuple)):
+            kernel_size = [kernel_size] * conv_dim
+
+        conv = conv_op(
+            input_channels,
+            output_channels,
+            kernel_size,
+            stride,
+            padding=[(i - 1) // 2 for i in kernel_size],
+            dilation=1,
+            bias=conv_bias
+        )
+
+        ops.append(conv)
+
+        if dropout_op is not None:
+            dropout = dropout_op(**dropout_op_kwargs)
+            ops.append(dropout)
+
+        if norm_op is not None:
+            norm = norm_op(output_channels, **norm_op_kwargs)
+            ops.append(norm)
+
+        if non_linear is not None:
+            non_linear = non_linear(**non_linear_kwargs)
+            ops.append(non_linear)
+
+        if non_linear_first and (norm_op is not None and non_linear is not None):
+            ops[-1], ops[-2] = ops[-2], ops[-1]
+
+        super().__init__(*ops)
+
+
+def get_matching_conv_transpose_op(conv_op: Type[_ConvNd]):
+    match conv_op:
+        case nn.Conv1d:
+            return nn.ConvTranspose1d
+        case nn.Conv2d:
+            return nn.ConvTranspose2d
+        case nn.Conv3d:
+            return nn.ConvTranspose3d
+        case _:
+            raise ValueError(f'Unknown conv op {conv_op}')
+
+
+def get_conv_dimensions(conv_op: Type[_ConvNd]):
+    match conv_op:
+        case nn.Conv1d:
+            return 1
+        case nn.Conv2d:
+            return 2
+        case nn.Conv3d:
+            return 3
+        case _:
+            raise ValueError(f'Unknown conv op {conv_op}')
