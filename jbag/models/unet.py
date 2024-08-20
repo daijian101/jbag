@@ -8,6 +8,7 @@ from torch.nn.modules.conv import _ConvNd
 from torch.nn.modules.dropout import _DropoutNd
 
 from jbag import logger
+from jbag.models.network_weight_initialization import get_initialization_fn, initialize_network
 from jbag.models.utils import get_conv_op, get_norm_op, get_non_linear_op
 
 
@@ -68,23 +69,6 @@ class UNet(nn.Module):
     def forward(self, x):
         skips = self.encoder(x)
         return self.decoder(skips)
-
-    @staticmethod
-    def initialize(module, a=1e-2, nonlinearity='leaky_relu'):
-        """
-        kaiming initialization. a is set to 0.01 by default, this is only worked for LeakyReLU.
-        Args:
-            module (torch.nn.Module):
-            a (float, optional, default=1e-2): Set 0 for ReLu. Set 1e-2 for LeakyReLU.
-            nonlinearity (str, optional, default='leaky_relu'):
-
-        Returns:
-
-        """
-        if isinstance(module, (nn.Conv2d, nn.Conv3d, nn.ConvTranspose2d, nn.ConvTranspose3d)):
-            module.weight = nn.init.kaiming_normal_(module.weight, a=a, nonlinearity=nonlinearity)
-            if module.bias is not None:
-                module.bias = nn.init.constant_(module.bias, 0)
 
 
 class Encoder(nn.Module):
@@ -390,43 +374,30 @@ def get_conv_dimensions(conv_op: Type[_ConvNd]):
             raise ValueError(f'Unknown conv op {conv_op}')
 
 
-def build_unet(cfg: Config):
-    conv_op = get_conv_op(cfg.conv_dim)
-    norm_op = get_norm_op(cfg.norm_op, cfg.conv_dim)
-    non_linear_op = get_non_linear_op(cfg.non_linear)
+def build_unet(network_config: Config):
+    conv_op = get_conv_op(network_config.conv_dim)
+    norm_op = get_norm_op(network_config.norm_op, network_config.conv_dim)
+    non_linear_op = get_non_linear_op(network_config.non_linear)
 
-    params = {'input_channels': cfg.input_channels,
-              'num_classes': cfg.num_classes,
-              'num_stages': cfg.num_stages,
-              'num_features_per_stage': cfg.num_features_per_stage.as_primitive(),
+    params = {'input_channels': network_config.input_channels,
+              'num_classes': network_config.num_classes,
+              'num_stages': network_config.num_stages,
+              'num_features_per_stage': network_config.num_features_per_stage.as_primitive(),
               'conv_op': conv_op,
-              'kernel_sizes': cfg.kernel_sizes.as_primitive(),
-              'strides': cfg.strides.as_primitive(),
-              'num_conv_per_stage_encoder': cfg.num_conv_per_stage_encoder.as_primitive(),
-              'num_conv_per_stage_decoder': cfg.num_conv_per_stage_decoder.as_primitive(),
-              'conv_bias': cfg.conv_bias,
+              'kernel_sizes': network_config.kernel_sizes.as_primitive(),
+              'strides': network_config.strides.as_primitive(),
+              'num_conv_per_stage_encoder': network_config.num_conv_per_stage_encoder.as_primitive(),
+              'num_conv_per_stage_decoder': network_config.num_conv_per_stage_decoder.as_primitive(),
+              'conv_bias': network_config.conv_bias,
               'norm_op': norm_op,
-              'norm_op_kwargs': cfg.norm_op_kwargs,
+              'norm_op_kwargs': network_config.norm_op_kwargs,
               'non_linear': non_linear_op,
-              'non_linear_kwargs': cfg.non_linear_kwargs,
-              'deep_supervision': cfg.deep_supervision,
-              'non_linear_first': cfg.non_linear_first,
+              'non_linear_kwargs': network_config.non_linear_kwargs,
+              'deep_supervision': network_config.deep_supervision,
+              'non_linear_first': network_config.non_linear_first,
               }
     network = UNet(**params)
 
-    allow_init = False
-    network_initialization_params = None
-    if 'initialization' in cfg and 'allow_init' in cfg.initialization:
-        allow_init = cfg.initialization.allow_init
-
-    if allow_init:
-        if 'params' in cfg.initialization:
-            network_initialization_params = cfg.initialization.params.as_primitive()
-        else:
-            logger.warning('No initialization parameters were provided for network weight initialization.')
-
-    if allow_init and hasattr(network, 'initialize'):
-        init_fn = partial(network.initialize, **network_initialization_params)
-        network.apply(init_fn)
+    initialize_network(network, network_config)
 
     return network
