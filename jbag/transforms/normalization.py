@@ -4,7 +4,7 @@ from jbag.transforms import Transform
 
 
 class ZscoreNormalization(Transform):
-    def __init__(self, keys, mean, std, lower_bound, upper_bound):
+    def __init__(self, keys, mean, std, lower_bound=None, upper_bound=None):
         """
         Z-score normalization.
 
@@ -12,8 +12,8 @@ class ZscoreNormalization(Transform):
             keys (str or sequence):
             mean (float):
             std (float):
-            lower_bound (float):
-            upper_bound (float):
+            lower_bound (float, optional, default=None):
+            upper_bound (float, optional, default=None):
         """
 
         super().__init__(keys)
@@ -25,7 +25,8 @@ class ZscoreNormalization(Transform):
     def _call_fun(self, data):
         for key in self.keys:
             value = data[key]
-            np.clip(value, self.lower_bound, self.upper_bound, out=value)
+            if self.lower_bound is not None or self.upper_bound is not None:
+                np.clip(value, self.lower_bound, self.upper_bound, out=value)
             value -= self.mean
             value /= max(self.std, 1e-8)
             data[key] = value
