@@ -87,7 +87,7 @@ def get_node_key(key, node, root):
 
 
 def search_node(node_hierarchy, node):
-    for i, key in enumerate(node_hierarchy[::-1]):
+    for i, key in enumerate(node_hierarchy):
         if key in node:
             if i == len(node_hierarchy) - 1:
                 return node, node_hierarchy[-1]
