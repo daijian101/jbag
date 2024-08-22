@@ -34,7 +34,7 @@ def write_list_2_txt(output_file, data_lst):
     ensure_dir(output_file)
     with open(output_file, 'w') as file:
         for i in range(len(data_lst)):
-            file.write(data_lst[i])
+            file.write(str(data_lst[i]))
             if i != len(data_lst) - 1:
                 file.write('\n')
 
