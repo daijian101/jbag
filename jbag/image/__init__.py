@@ -1,2 +1,2 @@
-from .contrast import transform_window
 from .overlay import overlay
+from .contrast_enhancement import windowing
