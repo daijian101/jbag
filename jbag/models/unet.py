@@ -1,4 +1,3 @@
-from functools import partial
 from typing import Union, Type
 
 import torch
@@ -7,9 +6,9 @@ from lazyConfig import Config
 from torch.nn.modules.conv import _ConvNd
 from torch.nn.modules.dropout import _DropoutNd
 
-from jbag import logger
-from jbag.models.network_weight_initialization import get_initialization_fn, initialize_network
-from jbag.models.utils import get_conv_op, get_norm_op, get_non_linear_op
+from jbag.models.network_weight_initialization import initialize_network
+from jbag.models.utils import get_conv_op, get_norm_op, get_non_linear_op, get_matching_conv_transpose_op, \
+    get_conv_dimensions
 
 
 class UNet(nn.Module):
@@ -348,30 +347,6 @@ class ConvDropoutNormReLU(nn.Sequential):
             ops[-1], ops[-2] = ops[-2], ops[-1]
 
         super().__init__(*ops)
-
-
-def get_matching_conv_transpose_op(conv_op: Type[_ConvNd]):
-    match conv_op:
-        case nn.Conv1d:
-            return nn.ConvTranspose1d
-        case nn.Conv2d:
-            return nn.ConvTranspose2d
-        case nn.Conv3d:
-            return nn.ConvTranspose3d
-        case _:
-            raise ValueError(f'Unknown conv op {conv_op}')
-
-
-def get_conv_dimensions(conv_op: Type[_ConvNd]):
-    match conv_op:
-        case nn.Conv1d:
-            return 1
-        case nn.Conv2d:
-            return 2
-        case nn.Conv3d:
-            return 3
-        case _:
-            raise ValueError(f'Unknown conv op {conv_op}')
 
 
 def build_unet(network_config: Config):

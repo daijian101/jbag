@@ -1,4 +1,7 @@
+from typing import Type
+
 import torch.nn as nn
+from torch.nn.modules.conv import _ConvNd
 
 
 def get_conv_op(dim):
@@ -31,3 +34,27 @@ def get_non_linear_op(op_name):
             return nn.LeakyReLU
         case 'relu':
             return nn.ReLU
+
+
+def get_matching_conv_transpose_op(conv_op: Type[_ConvNd]):
+    match conv_op:
+        case nn.Conv1d:
+            return nn.ConvTranspose1d
+        case nn.Conv2d:
+            return nn.ConvTranspose2d
+        case nn.Conv3d:
+            return nn.ConvTranspose3d
+        case _:
+            raise ValueError(f'Unknown conv op {conv_op}')
+
+
+def get_conv_dimensions(conv_op: Type[_ConvNd]):
+    match conv_op:
+        case nn.Conv1d:
+            return 1
+        case nn.Conv2d:
+            return 2
+        case nn.Conv3d:
+            return 3
+        case _:
+            raise ValueError(f'Unknown conv op {conv_op}')
