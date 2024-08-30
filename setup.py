@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='jbag',
-    version='2.0.6',
+    version='2.0.7',
     author='Dai Jian',
     author_email='daijian@stumail.ysu.edu.cn',
     description='Tools for medical image processing and deap learning.',
@@ -23,6 +23,7 @@ setuptools.setup(
         'dicom2nifti >= 2.4.8',
         'lazyConfig',
         'pandas',
-        'openpyxl'
+        'openpyxl',
+        'python-docx'
     ]
 )

@@ -84,7 +84,7 @@ def save_nifti(output_file,
 def read_dicom_series(input_dir: Union[str, Path]):
     from pydicom import dcmread
     if not os.path.exists(input_dir):
-        raise FileExistsError(f'{input_dir} does not exist.')
+        raise FileNotFoundError(f'{input_dir} does not exist.')
     instances = []
     for each in os.listdir(input_dir):
         if each.endswith('.dcm'):
@@ -146,7 +146,7 @@ def read_json(input_json_file):
 
     """
     if not os.path.exists(input_json_file):
-        raise FileExistsError(f'{input_json_file} does not exist.')
+        raise FileNotFoundError(f'{input_json_file} does not exist.')
     with open(input_json_file, 'r') as json_file:
         dct = json.load(json_file, object_hook=np_object_hook)
     return dct
