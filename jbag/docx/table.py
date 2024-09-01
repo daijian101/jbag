@@ -6,7 +6,7 @@ from docx.shared import Pt
 from docx.table import _Cell
 
 
-def cell(cell: Type[_Cell], text, font='Times New Roman', font_size=10, bold=False, italic=False,
+def set_cell(cell: Type[_Cell], text, font='Times New Roman', font_size=10, bold=False, italic=False,
          underline=False):
     cell.text = text
     run = cell.paragraphs[0].runs[0]
@@ -17,7 +17,7 @@ def cell(cell: Type[_Cell], text, font='Times New Roman', font_size=10, bold=Fal
     run.font.underline = underline
 
 
-def cell_border(cell: Type[_Cell],
+def set_cell_border(cell: Type[_Cell],
                 borders: Union[str, list[str], tuple[float, ...]],
                 styles: Union[str, list[str], tuple[float, ...]] = 'single',
                 sizes: Union[float, list[float], tuple[float, ...]] = 4,
@@ -49,13 +49,13 @@ def cell_border(cell: Type[_Cell],
 
     assert len(borders) == len(styles) == len(sizes) == len(colors)
 
-    tc = cell[0]._tc
+    tc = cell._tc
     tcPr = tc.get_or_add_tcPr()
     tcBorders = OxmlElement('w:tcBorders')
 
     for border, style, size, color in zip(borders, styles, sizes, colors):
         border_element = OxmlElement(f'w:{border}')
-        border_element.set(qn('w:val'), styles)
+        border_element.set(qn('w:val'), style)
         border_element.set(qn('w:sz'), str(size))
         border_element.set(qn('w:color'), color)
         tcBorders.append(border_element)
