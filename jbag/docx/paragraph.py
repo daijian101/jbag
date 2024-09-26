@@ -11,6 +11,7 @@ def add_paragraph(doc: Type[Document],
                   ):
     if text is None:
         text = ''
-    p = doc.add_paragraph(text='', style=style)
+    p = doc.add_paragraph(text=text, style=style)
     if alignment is not None:
         p.alignment = alignment
+    return p
