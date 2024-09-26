@@ -1,12 +1,10 @@
-from typing import Type
-
 from docx import Document
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 
 
-def add_paragraph(doc: Type[Document],
+def add_paragraph(doc: Document,
                   text=None,
-                  alignment: Type[WD_PARAGRAPH_ALIGNMENT] = WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
+                  alignment: WD_PARAGRAPH_ALIGNMENT = WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   style=None
                   ):
     if text is None:

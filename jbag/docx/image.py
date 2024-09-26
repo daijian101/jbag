@@ -1,5 +1,5 @@
 import os.path
-from typing import Type, Union
+from typing import Union
 
 from docx import Document
 from docx.shared import Inches
@@ -7,8 +7,8 @@ from docx.text.paragraph import Paragraph
 
 
 def add_image(image_file,
-              doc: Union[Type[Document], None] = None,
-              paragraph: Union[Type[Paragraph], None] = None,
+              doc: Union[Document, None] = None,
+              paragraph: Union[Paragraph, None] = None,
               width: float = 5,
               center: bool = True):
     if not os.path.exists(image_file):

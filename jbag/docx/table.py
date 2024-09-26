@@ -1,4 +1,4 @@
-from typing import Type, Union
+from typing import Union
 
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
@@ -6,8 +6,8 @@ from docx.shared import Pt
 from docx.table import _Cell
 
 
-def set_cell(cell: Type[_Cell], text, font='Times New Roman', font_size=10, bold=False, italic=False,
-         underline=False):
+def set_cell(cell: _Cell, text, font='Times New Roman', font_size=10, bold=False, italic=False,
+             underline=False):
     cell.text = text
     run = cell.paragraphs[0].runs[0]
     run.font.name = font
@@ -17,11 +17,11 @@ def set_cell(cell: Type[_Cell], text, font='Times New Roman', font_size=10, bold
     run.font.underline = underline
 
 
-def set_cell_border(cell: Type[_Cell],
-                borders: Union[str, list[str], tuple[float, ...]],
-                styles: Union[str, list[str], tuple[float, ...]] = 'single',
-                sizes: Union[float, list[float], tuple[float, ...]] = 4,
-                colors: Union[str, list[str], tuple[str, ...]] = 'auto'):
+def set_cell_border(cell: _Cell,
+                    borders: Union[str, list[str], tuple[float, ...]],
+                    styles: Union[str, list[str], tuple[float, ...]] = 'single',
+                    sizes: Union[float, list[float], tuple[float, ...]] = 4,
+                    colors: Union[str, list[str], tuple[str, ...]] = 'auto'):
     """
 
     Args:
