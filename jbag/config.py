@@ -1,14 +1,54 @@
 import re
 import tomllib
+from typing import Mapping
 
-import lazyConfig
+
+class Config(Mapping):
+    def __init__(self, config: Mapping):
+        self._config = config
+
+    def __getattr__(self, name):
+        try:
+            value = self._config[name]
+        except KeyError:
+            raise AttributeError(f'The config has no key {name}') from None
+        if isinstance(value, Mapping):
+            return Config(value)
+        return value
+
+    def __getitem__(self, key):
+        try:
+            value = self._config[key]
+        except KeyError:
+            raise KeyError(f'The config has no key {key}') from None
+        if isinstance(value, Mapping):
+            return Config(value)
+        return value
+
+    def as_primitive(self) -> dict:
+        return self._config
+
+    def __dir__(self) -> list:
+        return list(self._config.keys())
+
+    def __repr__(self) -> str:
+        return repr(self._config)
+
+    def __str__(self) -> str:
+        return f"configuration keys: {dir(self)}"
+
+    def __len__(self):
+        return len(self._config)
+
+    def __iter__(self):
+        return iter(self._config)
 
 
 def get_config(file):
     with open(file, 'rb') as f:
         config = tomllib.load(f)
     refine_nodes(config, config)
-    config = lazyConfig.from_primitive(config)
+    config = Config(config)
     return config
 
 
@@ -83,7 +123,7 @@ def get_node_key(key, node, root):
     node, unpacked_key = search_node(node_hierarchy, node)
     if node and unpacked_key:
         return node, unpacked_key
-    raise ValueError(f'Config does not contain key: {key}')
+    raise ValueError(f'The config has no key {key}')
 
 
 def search_node(node_hierarchy, node):
@@ -94,3 +134,10 @@ def search_node(node_hierarchy, node):
             else:
                 node = node[key]
     return None, None
+
+
+if __name__ == '__main__':
+    config = get_config('Dphm_unet++.toml')
+    # p1 = config.aer
+    p2 = config.cudnn.benchmark
+    print(p2)
