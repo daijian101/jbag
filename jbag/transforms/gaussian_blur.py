@@ -45,7 +45,7 @@ class GaussianBlurTransform(RandomTransform):
         else:
             sigmas = [[get_scalar(self.blur_sigma) for _ in range(max_spatial_dims)], ] * len(apply_to_channel) \
                 if self.synchronize_channels else \
-                [[get_scalar(self.blur_sigma) for _ in range(max_spatial_dims)] for _ in  range(len(apply_to_channel))]
+                [[get_scalar(self.blur_sigma) for _ in range(max_spatial_dims)] for _ in range(len(apply_to_channel))]
 
         for c, sigma in zip(apply_to_channel, sigmas):
             value = data[self.keys[c]]
@@ -55,22 +55,3 @@ class GaussianBlurTransform(RandomTransform):
             value = gaussian_filter(value, sigma=sigma, axes=axes)
             data[self.keys[c]] = value
         return data
-
-
-if __name__ == '__main__':
-    from cavass.ops import read_cavass_file, save_cavass_file
-    import numpy as np
-
-    image = read_cavass_file('/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')
-    image = image[None].astype(np.float64)
-    image = torch.from_numpy(image)
-    data = {'image': image}
-
-    t = GaussianBlurTransform(keys=['image'], apply_probability=1, blur_sigma=(0.5, 1),
-                              synchronize_channels=False, synchronize_axes=False, p_per_channel=1)
-
-    data = t(data)
-
-    image = data['image'][0].numpy()
-    save_cavass_file('/data1/dj/tmp/image.IM0', image.astype(np.uint16),
-                     reference_file='/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')

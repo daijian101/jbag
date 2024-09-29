@@ -1,4 +1,3 @@
-import time
 from typing import Union
 
 import torch
@@ -65,26 +64,3 @@ class GammaTransform(RandomTransform):
                 value *= -1
             data[self.keys[c]] = value
         return data
-
-
-if __name__ == '__main__':
-    # from cavass.ops import read_cavass_file, save_cavass_file
-    import numpy as np
-    import matplotlib.pyplot as plt
-    from skimage.data import camera
-
-    image = camera()
-    plt.imshow(image, cmap='gray')
-    plt.show()
-    image = image[None]
-    image = torch.from_numpy(image).to(torch.float32)
-    data = {'image': image}
-    gbt = GammaTransform(keys=['image'], apply_probability=1, gamma=(1, 2),
-                         p_invert_image=1, synchronize_channels=False,
-                         p_per_channel=1, p_retain_stats=1)
-    data = gbt(data)
-    gamma_image = data['image']
-    image = gamma_image.squeeze(0).numpy().astype(np.uint8)
-    plt.imshow(image, cmap='gray')
-    plt.show()
-    pass

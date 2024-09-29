@@ -224,35 +224,3 @@ def create_affine_matrix_2d(rotation_angle, scaling_factors):
     # Combine rotation and scaling
     RS = R @ S
     return RS
-
-
-if __name__ == '__main__':
-    from cavass.ops import read_cavass_file, save_cavass_file
-    from jbag.image import overlay
-    from cavass.window_transform import cavass_soft_tissue_window
-    import numpy as np
-    import matplotlib.pyplot as plt
-
-    image = read_cavass_file('/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')
-    image = image[None].astype(np.float32)
-    image = torch.from_numpy(image)
-
-    smt = read_cavass_file('/data1/dj/data/bca/cavass_data/SMT/N007PETCT.BIM')
-    smt = smt[None].astype(bool)
-    smt = torch.from_numpy(smt)
-    data = {'image': image, 'smt': smt}
-
-    st = SpatialTransform(keys=['image', 'smt'], apply_probability=1, p_rotation=1, p_scaling=1, p_elastic_deform=0,
-                          rotation_angle_range=[-np.pi, np.pi],
-                          scaling_range=(0.7, 1.4), random_crop=False, interpolation_modes=['bilinear', 'nearest'])
-    data = st(data)
-
-    image = data['image'][0].numpy()
-    smt = data['smt'][0].numpy()
-    smt = smt.astype(bool)
-
-    #
-    save_cavass_file('/data1/dj/tmp/image.IM0', image.astype(np.uint16),
-                     reference_file='/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')
-
-    save_cavass_file('/data1/dj/tmp/SMT.BIM', smt, True, reference_file='/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')

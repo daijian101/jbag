@@ -2,8 +2,8 @@ from typing import Union, Type
 
 import torch
 import torch.nn as nn
-from lazyConfig import Config
 
+from jbag.config import Config
 from jbag.models.network_weight_initialization import initialize_network
 from jbag.models.utils import get_norm_op, get_non_linear_op
 

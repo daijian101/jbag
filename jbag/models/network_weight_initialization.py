@@ -1,9 +1,9 @@
 from functools import partial
 
-from lazyConfig import Config
 from torch import nn
 
 from jbag import logger
+from jbag.config import Config
 
 
 def kaiming_initialize(module, a=1e-2, nonlinearity='leaky_relu'):

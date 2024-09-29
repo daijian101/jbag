@@ -1,7 +1,6 @@
 from typing import Union
 
 import SimpleITK as sitk
-import numpy as np
 
 
 def overlay(image, label_map, color_map: Union[list, tuple] = None, opacity=0.5):

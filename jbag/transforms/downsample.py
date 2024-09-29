@@ -32,21 +32,3 @@ class DownsampleTransform(Transform):
                     results.append(interpolate(value[None].float(), new_shape, mode='nearest-exact')[0].to(value.dtype))
             data[key] = results
         return data
-
-
-if __name__ == '__main__':
-    from cavass.ops import read_cavass_file
-    import torch
-
-    image = read_cavass_file('/data1/dj/data/bca/cavass_data/OAM/N007PETCT.BIM')
-    image = image[None]
-    image = torch.from_numpy(image)
-    data = {'image': image}
-
-    t = DownsampleTransform(keys=['image'], scales=[0.5, 0.2])
-
-    data = t(data)
-
-    image = data['image_downsampled']
-    image1 = image[0][0].numpy()
-    image2 = image[1][0].numpy()

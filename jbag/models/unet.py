@@ -2,10 +2,10 @@ from typing import Union, Type
 
 import torch
 import torch.nn as nn
-from lazyConfig import Config
 from torch.nn.modules.conv import _ConvNd
 from torch.nn.modules.dropout import _DropoutNd
 
+from jbag.config import Config
 from jbag.models.network_weight_initialization import initialize_network
 from jbag.models.utils import get_conv_op, get_norm_op, get_non_linear_op, get_matching_conv_transpose_op, \
     get_conv_dimensions
@@ -357,12 +357,12 @@ def build_unet(network_config: Config):
     params = {'input_channels': network_config.input_channels,
               'num_classes': network_config.num_classes,
               'num_stages': network_config.num_stages,
-              'num_features_per_stage': network_config.num_features_per_stage.as_primitive(),
+              'num_features_per_stage': network_config.num_features_per_stage,
               'conv_op': conv_op,
-              'kernel_sizes': network_config.kernel_sizes.as_primitive(),
-              'strides': network_config.strides.as_primitive(),
-              'num_conv_per_stage_encoder': network_config.num_conv_per_stage_encoder.as_primitive(),
-              'num_conv_per_stage_decoder': network_config.num_conv_per_stage_decoder.as_primitive(),
+              'kernel_sizes': network_config.kernel_sizes,
+              'strides': network_config.strides,
+              'num_conv_per_stage_encoder': network_config.num_conv_per_stage_encoder,
+              'num_conv_per_stage_decoder': network_config.num_conv_per_stage_decoder,
               'conv_bias': network_config.conv_bias,
               'norm_op': norm_op,
               'norm_op_kwargs': network_config.norm_op_kwargs,

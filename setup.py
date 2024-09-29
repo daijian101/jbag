@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='jbag',
-    version='3.0.0',
+    version='4.0.0',
     author='Dai Jian',
     author_email='daijian@stumail.ysu.edu.cn',
     description='Tools for medical image processing and deap learning.',
@@ -21,9 +21,9 @@ setuptools.setup(
         'SimpleITK >= 2.1.1.2',
         'pydicom >= 2.4.3',
         'dicom2nifti >= 2.4.8',
-        'lazyConfig',
         'pandas',
         'openpyxl',
-        'python-docx'
+        'python-docx',
+        'scikit-image',
     ]
 )

@@ -32,20 +32,3 @@ class MirrorTransform(RandomTransform):
             value = torch.flip(value, allowed_axes)
             data[key] = value
         return data
-
-
-if __name__ == '__main__':
-    from cavass.ops import read_cavass_file, save_cavass_file
-    import numpy as np
-
-    image = read_cavass_file('/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')
-    image = image[None].astype(np.float64)
-    image = torch.from_numpy(image)
-    data = {'image': image}
-
-    gbt = MirrorTransform(keys=['image'], apply_probability=1, allowed_axes=[1], p_per_axes=1)
-    data = gbt(data)
-
-    image = data['image'][0].numpy()
-    save_cavass_file('/data1/dj/tmp/image.IM0', image.astype(np.uint16),
-                     reference_file='/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')

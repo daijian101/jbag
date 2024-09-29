@@ -1,8 +1,9 @@
 from typing import Union
 
+import torch
+
 from jbag.transforms._utils import get_non_one_scalar
 from jbag.transforms.transforms import RandomTransform
-import torch
 
 
 class ContrastTransform(RandomTransform):
@@ -52,24 +53,3 @@ class ContrastTransform(RandomTransform):
                 value.clamp_(min_intensity, max_intensity)
             data[self.keys[c]] = value
         return data
-
-
-if __name__ == '__main__':
-    from cavass.ops import read_cavass_file, save_cavass_file
-    import numpy as np
-
-    image = read_cavass_file('/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')
-    image = image[None].astype(np.float64)
-    image = torch.from_numpy(image)
-    data = {'image': image}
-
-    t = ContrastTransform(keys=['image'], apply_probability=1,contrast_range=(1, 2), preserve_range=True, synchronize_channels=False,  p_per_channel=1)
-
-    data = t(data)
-
-    image = data['image'][0]
-    image = image.numpy()
-    save_cavass_file('/data1/dj/tmp/image.IM0', image.astype(np.uint16),
-                     reference_file='/data1/dj/data/bca/cavass_data/images/N007PETCT.IM0')
-
-

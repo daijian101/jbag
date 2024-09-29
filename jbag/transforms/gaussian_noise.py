@@ -1,6 +1,5 @@
 from typing import Union
 
-import matplotlib.pyplot as plt
 import torch
 
 from jbag.transforms._utils import get_scalar
@@ -43,18 +42,3 @@ class GaussianNoiseTransform(RandomTransform):
             value += gaussian
             data[self.keys[c]] = value
         return data
-
-
-if __name__ == '__main__':
-    image = torch.zeros((512, 512), dtype=torch.float)
-    image = image[None]
-    data = {'image': image}
-
-    t = GaussianNoiseTransform(keys=['image'], apply_probability=1, noise_variance=0.15,
-                              synchronize_channels=False, p_per_channel=1)
-
-    data = t(data)
-    image = data['image'][0].numpy()
-    image = (image - image.min()) / (image.max() - image.min())
-    plt.imshow(image, cmap='gray')
-    plt.show()
