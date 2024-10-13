@@ -25,12 +25,12 @@ def save_mat(output_file, data, key='scene'):
     savemat(output_file, {key: data})
 
 
-def read_txt_2_list(input_file):
+def read_txt2list(input_file):
     with open(input_file, 'r') as input_file:
         return [each.strip('\n') for each in input_file.readlines()]
 
 
-def write_list_2_txt(output_file, data_lst):
+def write_list2txt(output_file, data_lst):
     ensure_dir(output_file)
     with open(output_file, 'w') as file:
         for i in range(len(data_lst)):
