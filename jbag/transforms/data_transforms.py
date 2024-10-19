@@ -23,7 +23,12 @@ class ToTensor(Transform):
 
     def _call_fun(self, data):
         for key in self.keys:
-            data[key] = torch.from_numpy(data[key])
+            value = data[key]
+            if isinstance(value, np.ndarray):
+                value = torch.from_numpy(value)
+            else:
+                value = torch.as_tensor(value)
+            data[key] = value
         return data
 
 

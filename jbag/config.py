@@ -1,6 +1,6 @@
 import re
 import tomllib
-from typing import Mapping
+from typing import Mapping, Union, LiteralString
 
 
 class Config(Mapping):
@@ -44,7 +44,7 @@ class Config(Mapping):
         return iter(self._config)
 
 
-def get_config(file):
+def get_config(file: Union[str, LiteralString]):
     with open(file, 'rb') as f:
         config = tomllib.load(f)
     refine_nodes(config, config)
@@ -134,10 +134,3 @@ def search_node(node_hierarchy, node):
             else:
                 node = node[key]
     return None, None
-
-
-if __name__ == '__main__':
-    config = get_config('Dphm_unet++.toml')
-    # p1 = config.aer
-    p2 = config.cudnn.benchmark
-    print(p2)

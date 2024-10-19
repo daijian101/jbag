@@ -1,5 +1,5 @@
 import os.path
-from typing import Union
+from typing import Union, LiteralString
 
 import torch
 from torch import nn
@@ -19,7 +19,8 @@ def get_unwrapped_model(model: nn.Module):
     return model
 
 
-def save_checkpoint(file, model: nn.Module, optimizer: Union[None, Optimizer] = None, **kwargs):
+def save_checkpoint(file: Union[str, LiteralString], model: nn.Module, optimizer: Union[None, Optimizer] = None,
+                    **kwargs):
     checkpoint = {MODEL: get_unwrapped_model(model).state_dict()}
     if optimizer:
         checkpoint[OPTIMIZER] = optimizer.state_dict()
@@ -33,7 +34,8 @@ def save_checkpoint(file, model: nn.Module, optimizer: Union[None, Optimizer] = 
     torch.save(checkpoint, file)
 
 
-def load_checkpoint(file, model: Union[nn.Module, None] = None, optimizer: Union[Optimizer, None] = None):
+def load_checkpoint(file: Union[str, LiteralString], model: Union[nn.Module, None] = None,
+                    optimizer: Union[Optimizer, None] = None):
     logger.info(f'Loading checkpoint {file}.')
     checkpoint = torch.load(file)
     if model:

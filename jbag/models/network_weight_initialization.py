@@ -29,7 +29,7 @@ def get_initialization_fn(method_name):
             return kaiming_initialize
 
 
-def initialize_network(network:nn.Module, network_config: Config):
+def initialize_network(network: nn.Module, network_config: Config):
     allow_init = False
     network_initialization_params = None
     method = None

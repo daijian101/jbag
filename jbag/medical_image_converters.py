@@ -1,4 +1,5 @@
 import os
+from typing import LiteralString
 
 import dicom2nifti as d2n
 
@@ -9,8 +10,8 @@ def nifti2dicom(input_file, output_dir, accession_number=1):
     `sudo apt install nifti2dicom`
     https://github.com/biolab-unige/nifti2dicom
     Args:
-        input_file (str or pathlib.Path):
-        output_dir (str or pathlib.Path):
+        input_file (str or LiteralString):
+        output_dir (str or LiteralString):
         accession_number (int, optional, default=1):
 
     Returns:

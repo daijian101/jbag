@@ -9,7 +9,7 @@ from jbag.transforms.transforms import RandomTransform
 class ContrastTransform(RandomTransform):
     def __init__(self, keys,
                  apply_probability,
-                 contrast_range:Union[tuple[float], list[float]],
+                 contrast_range: Union[tuple[float], list[float]],
                  preserve_range: bool,
                  synchronize_channels: bool = False,
                  p_per_channel: float = 1):
