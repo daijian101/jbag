@@ -1,3 +1,4 @@
+import os
 import re
 import tomllib
 from typing import Mapping, Union, LiteralString
@@ -45,6 +46,8 @@ class Config(Mapping):
 
 
 def get_config(file: Union[str, LiteralString]):
+    assert os.path.isfile(file), f'{file} does not exist or is not a file!'
+
     with open(file, 'rb') as f:
         config = tomllib.load(f)
     refine_nodes(config, config)
