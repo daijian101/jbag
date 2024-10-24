@@ -40,7 +40,7 @@ def gaussian_filter(input: torch.Tensor, sigma, axes=None, truncated=4):
 
     for axis, s in zip(axes, sigma):
         kernel = _build_kernel(s, truncated, dtype=input.dtype)
-        conv_weight_shape = [1] * (input.dim() +1)
+        conv_weight_shape = [1] * (input.dim() + 1)
         conv_weight_shape[1 + axis] = len(kernel)
         conv_weight = kernel.view(*conv_weight_shape).expand(input.shape[0], *[-1] * input.dim())
         padding_shape = [0, 0] * (input.dim() - 1)
@@ -53,6 +53,6 @@ def gaussian_filter(input: torch.Tensor, sigma, axes=None, truncated=4):
 
 def _build_kernel(sigma: float, truncate: float, dtype):
     radius = int(sigma * truncate + 0.5)
-    x = torch.arange(-radius, radius+1, dtype=dtype)
+    x = torch.arange(-radius, radius + 1, dtype=dtype)
     kernel = torch.exp(-0.5 * (x / sigma).pow(2))
     return kernel / kernel.sum()

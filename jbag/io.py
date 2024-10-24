@@ -2,8 +2,7 @@ import json
 import os.path
 from base64 import b64encode, b64decode
 from collections import OrderedDict
-from pathlib import Path
-from typing import Union
+from typing import Union, LiteralString
 
 import numpy as np
 import pandas as pd
@@ -15,23 +14,26 @@ from jbag import logger
 
 def read_mat(input_file, key='scene'):
     from scipy.io import loadmat
+    assert os.path.isfile(input_file), f'{input_file} does not exist or is not a file!'
     data = loadmat(input_file)[key]
     return data
 
 
 def save_mat(output_file, data, key='scene'):
     from scipy.io import savemat
-    ensure_dir(output_file)
+    ensure_output_file_dir_existence(output_file)
     savemat(output_file, {key: data})
 
 
 def read_txt2list(input_file):
+    assert os.path.isfile(input_file), f'{input_file} does not exist or is not a file!'
+
     with open(input_file, 'r') as input_file:
         return [each.strip('\n') for each in input_file.readlines()]
 
 
 def write_list2txt(output_file, data_lst):
-    ensure_dir(output_file)
+    ensure_output_file_dir_existence(output_file)
     with open(output_file, 'w') as file:
         for i in range(len(data_lst)):
             file.write(str(data_lst[i]))
@@ -47,7 +49,7 @@ def save_nifti(output_file,
     Save image with nii format.
 
     Args:
-        output_file (str or pathlib.Path):
+        output_file (str or LiteralString):
         data (numpy.ndarray):
         voxel_spacing (sequence or None, optional, default=None): `tuple(x, y, z)`. Voxel spacing of each axis. If None,
             make `voxel_spacing` as `(1.0, 1.0, 1.0)`.
@@ -76,15 +78,16 @@ def save_nifti(output_file,
 
     # create a NIfTI image object
     import nibabel as nib
-    ensure_dir(output_file)
+    ensure_output_file_dir_existence(output_file)
     nii_img = nib.Nifti1Image(data, affine=affine_matrix)
     nib.save(nii_img, output_file)
 
 
-def read_dicom_series(input_dir: Union[str, Path]):
+def read_dicom_series(input_dir: Union[str, LiteralString]):
     from pydicom import dcmread
-    if not os.path.exists(input_dir):
-        raise FileNotFoundError(f'{input_dir} does not exist.')
+
+    assert os.path.exists(input_dir), f'{input_dir} does not exist!'
+
     instances = []
     for each in os.listdir(input_dir):
         if each.endswith('.dcm'):
@@ -140,13 +143,13 @@ def read_json(input_json_file):
     Read and convert `input_json_file`.
 
     Args:
-        input_json_file (str or pathlib.Path):
+        input_json_file (str or LiteralString):
 
     Returns:
 
     """
-    if not os.path.exists(input_json_file):
-        raise FileNotFoundError(f'{input_json_file} does not exist.')
+    assert os.path.isfile(input_json_file), f'{input_json_file} does not exist or is not a file!'
+
     with open(input_json_file, 'r') as json_file:
         dct = json.load(json_file, object_hook=np_object_hook)
     return dct
@@ -190,7 +193,7 @@ def save_json(output_file, obj, primitive=False, base64=True):
     Convert obj to JSON object and save as file.
 
     Args:
-        output_file (str or pathlib.Path):
+        output_file (str or LiteralString):
         obj (mapping):
         primitive (bool, optional, default=False): Use primitive type if `True`. In primitive schema, `numpy.ndarray` is
             stored as JSON list and `np.generic` is stored as a number.
@@ -199,15 +202,9 @@ def save_json(output_file, obj, primitive=False, base64=True):
     Returns:
 
     """
-    ensure_dir(output_file)
+    ensure_output_file_dir_existence(output_file)
     with open(output_file, 'w') as file:
         json.dump(obj, file, cls=NumpyJSONEncoder, **{'primitive': primitive, 'base64': base64})
-
-
-def ensure_dir(input_file):
-    input_dir = os.path.split(input_file)[0]
-    if not os.path.exists(input_dir):
-        os.makedirs(input_dir, exist_ok=True)
 
 
 def scp(dst_user, dst_host, dst_path, local_path, dst_port=None, recursive=False, send=False, receive=False):
@@ -217,8 +214,8 @@ def scp(dst_user, dst_host, dst_path, local_path, dst_port=None, recursive=False
     Args:
         dst_user (str):
         dst_host (str):
-        dst_path (str or Path):
-        local_path (str or Path):
+        dst_path (str or LiteralString):
+        local_path (str or LiteralString):
         dst_port (str or int or None, optional, default=None): If None, usually refer to port 22.
         recursive (bool, default=False): Transmit directories recursively.
         send (bool, default=False): Send file(s) from local to destination.
@@ -242,12 +239,13 @@ def scp(dst_user, dst_host, dst_path, local_path, dst_port=None, recursive=False
     os.system(cmd)
 
 
-def save_excel(output_file, data: Union[dict, pd.DataFrame], sheet_name: str = 'Sheet1', append: bool = False, overlay_sheet: bool=False,
+def save_excel(output_file, data: Union[dict, pd.DataFrame], sheet_name: str = 'Sheet1', append: bool = False,
+               overlay_sheet: bool = False,
                column_width: int = None, auto_adjust_width: bool = False, index=False):
     """
     Save data to Excel file.
     Args:
-        output_file (str):
+        output_file (str or LiteralString):
         data (dict | pd.DataFrame):
         sheet_name (str, optional, default='Sheet1'):
         append (bool, optional, default=False): If True, append to existing file.
@@ -273,6 +271,8 @@ def save_excel(output_file, data: Union[dict, pd.DataFrame], sheet_name: str = '
     if isinstance(data, dict):
         data = pd.DataFrame(data)
 
+    ensure_output_file_dir_existence(output_file)
+
     with pd.ExcelWriter(output_file, engine='openpyxl', mode=write_mode, if_sheet_exists=if_sheet_exists) as writer:
         data.to_excel(writer, sheet_name=sheet_name, index=index)
 
@@ -292,3 +292,15 @@ def save_excel(output_file, data: Union[dict, pd.DataFrame], sheet_name: str = '
 
         # Save the workbook
         book.save(output_file)
+
+
+def ensure_output_dir_existence(output_dir):
+    mk_output_dir = not os.path.exists(output_dir)
+    if mk_output_dir:
+        os.makedirs(output_dir)
+    return mk_output_dir, output_dir
+
+
+def ensure_output_file_dir_existence(output_file):
+    output_dir = os.path.split(output_file)[0]
+    return ensure_output_dir_existence(output_dir)

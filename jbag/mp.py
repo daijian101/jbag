@@ -4,7 +4,7 @@ from time import sleep
 from tqdm import tqdm
 
 
-def fork(fn,n_workers, params):
+def fork(fn, n_workers, params):
     """
     Invoke fn with multiple processors.
     Args:
@@ -20,7 +20,7 @@ def fork(fn,n_workers, params):
         for each_param in params:
             if not isinstance(each_param, tuple):
                 each_param = tuple(each_param)
-            r.append(p.starmap_async(fn, (each_param, )))
+            r.append(p.starmap_async(fn, (each_param,)))
 
         remaining = list(range(len(params)))
         workers = [e for e in p._pool]

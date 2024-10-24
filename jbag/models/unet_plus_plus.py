@@ -57,53 +57,53 @@ class UNetPlusPlus(nn.Module):
 
         self.conv0_0 = ConvBlock(input_channels, filters[0], filters[0],
                                  norm_op=norm_op, norm_op_kwargs=norm_op_kwargs,
-                                 non_linear=non_linear,non_linear_kwargs=non_linear_kwargs)
+                                 non_linear=non_linear, non_linear_kwargs=non_linear_kwargs)
         self.conv1_0 = ConvBlock(filters[0], filters[1], filters[1],
                                  norm_op=norm_op, norm_op_kwargs=norm_op_kwargs,
-                                 non_linear=non_linear,non_linear_kwargs=non_linear_kwargs)
+                                 non_linear=non_linear, non_linear_kwargs=non_linear_kwargs)
         self.conv2_0 = ConvBlock(filters[1], filters[2], filters[2],
                                  norm_op=norm_op, norm_op_kwargs=norm_op_kwargs,
-                                 non_linear=non_linear,non_linear_kwargs=non_linear_kwargs)
+                                 non_linear=non_linear, non_linear_kwargs=non_linear_kwargs)
         self.conv3_0 = ConvBlock(filters[2], filters[3], filters[3],
                                  norm_op=norm_op, norm_op_kwargs=norm_op_kwargs,
-                                 non_linear=non_linear,non_linear_kwargs=non_linear_kwargs)
+                                 non_linear=non_linear, non_linear_kwargs=non_linear_kwargs)
         self.conv4_0 = ConvBlock(filters[3], filters[4], filters[4],
                                  norm_op=norm_op, norm_op_kwargs=norm_op_kwargs,
-                                 non_linear=non_linear,non_linear_kwargs=non_linear_kwargs)
+                                 non_linear=non_linear, non_linear_kwargs=non_linear_kwargs)
 
         self.conv0_1 = ConvBlock(filters[0] + filters[1], filters[0], filters[0],
                                  norm_op=norm_op, norm_op_kwargs=norm_op_kwargs,
-                                 non_linear=non_linear,non_linear_kwargs=non_linear_kwargs)
+                                 non_linear=non_linear, non_linear_kwargs=non_linear_kwargs)
         self.conv1_1 = ConvBlock(filters[1] + filters[2], filters[1], filters[1],
                                  norm_op=norm_op, norm_op_kwargs=norm_op_kwargs,
-                                 non_linear=non_linear,non_linear_kwargs=non_linear_kwargs)
+                                 non_linear=non_linear, non_linear_kwargs=non_linear_kwargs)
         self.conv2_1 = ConvBlock(filters[2] + filters[3], filters[2], filters[2],
                                  norm_op=norm_op, norm_op_kwargs=norm_op_kwargs,
-                                 non_linear=non_linear,non_linear_kwargs=non_linear_kwargs)
+                                 non_linear=non_linear, non_linear_kwargs=non_linear_kwargs)
         self.conv3_1 = ConvBlock(filters[3] + filters[4], filters[3], filters[3],
                                  norm_op=norm_op, norm_op_kwargs=norm_op_kwargs,
-                                 non_linear=non_linear,non_linear_kwargs=non_linear_kwargs)
+                                 non_linear=non_linear, non_linear_kwargs=non_linear_kwargs)
 
         self.conv0_2 = ConvBlock(filters[0] * 2 + filters[1], filters[0], filters[0],
                                  norm_op=norm_op, norm_op_kwargs=norm_op_kwargs,
-                                 non_linear=non_linear,non_linear_kwargs=non_linear_kwargs)
+                                 non_linear=non_linear, non_linear_kwargs=non_linear_kwargs)
         self.conv1_2 = ConvBlock(filters[1] * 2 + filters[2], filters[1], filters[1],
                                  norm_op=norm_op, norm_op_kwargs=norm_op_kwargs,
-                                 non_linear=non_linear,non_linear_kwargs=non_linear_kwargs)
+                                 non_linear=non_linear, non_linear_kwargs=non_linear_kwargs)
         self.conv2_2 = ConvBlock(filters[2] * 2 + filters[3], filters[2], filters[2],
                                  norm_op=norm_op, norm_op_kwargs=norm_op_kwargs,
-                                 non_linear=non_linear,non_linear_kwargs=non_linear_kwargs)
+                                 non_linear=non_linear, non_linear_kwargs=non_linear_kwargs)
 
         self.conv0_3 = ConvBlock(filters[0] * 3 + filters[1], filters[0], filters[0],
                                  norm_op=norm_op, norm_op_kwargs=norm_op_kwargs,
-                                 non_linear=non_linear,non_linear_kwargs=non_linear_kwargs)
+                                 non_linear=non_linear, non_linear_kwargs=non_linear_kwargs)
         self.conv1_3 = ConvBlock(filters[1] * 3 + filters[2], filters[1], filters[1],
                                  norm_op=norm_op, norm_op_kwargs=norm_op_kwargs,
-                                 non_linear=non_linear,non_linear_kwargs=non_linear_kwargs)
+                                 non_linear=non_linear, non_linear_kwargs=non_linear_kwargs)
 
         self.conv0_4 = ConvBlock(filters[0] * 4 + filters[1], filters[0], filters[0],
                                  norm_op=norm_op, norm_op_kwargs=norm_op_kwargs,
-                                 non_linear=non_linear,non_linear_kwargs=non_linear_kwargs)
+                                 non_linear=non_linear, non_linear_kwargs=non_linear_kwargs)
 
         self.final = nn.Conv2d(filters[0], num_classes, kernel_size=1)
 
