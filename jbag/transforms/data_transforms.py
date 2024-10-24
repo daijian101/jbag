@@ -57,7 +57,7 @@ class Repeat(Transform):
 
         Args:
             keys (str or sequence):
-            dim (int):
+            axis (int):
             repeats (int):
         """
         super().__init__(keys)
