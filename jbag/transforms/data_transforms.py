@@ -1,6 +1,5 @@
 import numpy as np
 import torch
-from einops import rearrange, repeat
 
 from jbag.transforms.transforms import Transform
 
@@ -23,59 +22,51 @@ class ToTensor(Transform):
 
     def _call_fun(self, data):
         for key in self.keys:
-            data[key] = torch.from_numpy(data[key])
-        return data
-
-
-class Rearrange(Transform):
-    def __init__(self, keys, pattern):
-        """
-        Change the arrangement of given elements.
-
-        Args:
-            keys (str or sequence):
-            pattern (str): Arranging pattern. For example "i j k -> j k i".
-        """
-        super().__init__(keys)
-        self.pattern = pattern
-
-    def _call_fun(self, data):
-        for key in self.keys:
             value = data[key]
-            value = rearrange(value, self.pattern)
-            data[key] = value
-        return data
-
-
-class Repeat(Transform):
-    def __init__(self, keys, pattern, **kwargs):
-        super().__init__(keys)
-        self.pattern = pattern
-        self.kwargs = kwargs
-
-    def _call_fun(self, data):
-        for key in self.keys:
-            value = data[key]
-            value = repeat(value, self.pattern, **self.kwargs)
-            data[key] = value
+            if isinstance(value, np.ndarray):
+                data[key] = torch.from_numpy(value)
+            else:
+                data[key] = torch.tensor(value)
         return data
 
 
 class AddChannel(Transform):
-    def __init__(self, keys, dim):
+    def __init__(self, keys, axis):
         """
         Add additional dimension in specific position.
 
         Args:
             keys (str or sequence):
-            dim (int):
+            axis (int):
         """
         super().__init__(keys)
-        self.dim = dim
+        self.axis = axis
 
     def _call_fun(self, data):
         for key in self.keys:
             value = data[key]
-            value = np.expand_dims(value, axis=self.dim)
+            value = np.expand_dims(value, axis=self.axis)
+            data[key] = value
+        return data
+
+
+class Repeat(Transform):
+    def __init__(self, keys, repeats, axis):
+        """
+        Repeat specific dimension.
+
+        Args:
+            keys (str or sequence):
+            dim (int):
+            repeats (int):
+        """
+        super().__init__(keys)
+        self.axis = axis
+        self.repeats = repeats
+
+    def _call_fun(self, data):
+        for key in self.keys:
+            value = data[key]
+            value = np.repeat(value, self.repeats, axis=self.axis)
             data[key] = value
         return data
