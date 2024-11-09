@@ -3,7 +3,6 @@ import shutil
 
 import nibabel as nib
 import numpy as np
-from nii2dcm.dcm import DicomMRI
 from pydicom import Dataset
 from pydicom.uid import generate_uid
 

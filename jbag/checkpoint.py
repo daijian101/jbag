@@ -2,12 +2,12 @@ import os.path
 from typing import Union, LiteralString
 
 import torch
-from jbag.io import ensure_output_file_dir_existence
 from torch import nn
 from torch.nn import DataParallel
 from torch.nn.parallel import DistributedDataParallel
 from torch.optim import Optimizer
 
+from jbag.io import ensure_output_file_dir_existence
 from jbag.log import logger
 
 MODEL = 'model'
