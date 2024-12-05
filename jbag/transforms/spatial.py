@@ -18,13 +18,13 @@ class SpatialTransform(RandomTransform):
                  random_crop: bool = False,
                  interpolation_modes: Union[str, list[str], tuple[str]] = 'nearest',
                  p_rotation: float = 0.0,
-                 rotation_angle_range: Union[float, list[float, float], tuple[float, float]] = (0, 2 * np.pi),
+                 rotation_angle_range: Union[float, list[float], tuple[float]] = (0, 2 * np.pi),
                  p_scaling: float = 0.0,
-                 scaling_range: Union[float, list[float, float], tuple[float, float]] = (0.7, 1.3),
+                 scaling_range: Union[float, list[float], tuple[float]] = (0.7, 1.3),
                  p_synchronize_scaling_across_axes: float = 1,
                  p_elastic_deform: float = 0.0,
-                 elastic_deform_scale: Union[float, list[float, float], tuple[float, float]] = (0, 0.2),
-                 elastic_deform_magnitude: Union[float, list[float, float], tuple[float, float]] = (0, 0.2),
+                 elastic_deform_scale: Union[float, list[float], tuple[float]] = (0, 0.2),
+                 elastic_deform_magnitude: Union[float, list[float], tuple[float]] = (0, 0.2),
                  ):
         """
         Spatial affine transform.
