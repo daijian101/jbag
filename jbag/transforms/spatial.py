@@ -27,7 +27,7 @@ class SpatialTransform(RandomTransform):
                  elastic_deform_magnitude: Union[float, list[float], tuple[float]] = (0, 0.2),
                  ):
         """
-        Spatial affine transform.
+        Spatial affine transform. The input data should be in the dimension format of [C, [H, W, D]].
         Args:
             keys (str or sequence):
             apply_probability (float):
