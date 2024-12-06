@@ -36,20 +36,19 @@ def save_checkpoint(file: Union[str, LiteralString], model: nn.Module, optimizer
 def load_checkpoint(file: Union[str, LiteralString], model: Union[nn.Module, None] = None,
                     optimizer: Union[Optimizer, None] = None):
     assert os.path.isfile(file), f'{file} does not exist or is not a file!'
-    logger.info(f'Loading checkpoint {file}.')
     checkpoint = torch.load(file)
     if model:
         if MODEL not in checkpoint:
-            logger.warning(f'Checkpoint {file} does not include model state dict.')
+            logger.warning(f'{file} does not include model weights.')
         else:
             model = get_unwrapped_model(model)
             model.load_state_dict(checkpoint[MODEL])
-            logger.info('Model state loaded.')
+            logger.info(f'Loading model weights from {file}.')
 
     if optimizer:
         if OPTIMIZER not in checkpoint:
-            logger.warning(f'Checkpoint {file} does not include optimizer state dict.')
+            logger.warning(f'{file} does not include optimizer weights.')
         else:
             optimizer.load_state_dict(checkpoint[OPTIMIZER])
-            logger.info(f'Optimizer state loaded.')
+            logger.info(f'Loading optimizer weights from {file}.')
     return checkpoint
