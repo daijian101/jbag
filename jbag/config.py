@@ -45,7 +45,7 @@ class Config(Mapping):
         return iter(self._config)
 
 
-def get_config(file: Union[str, LiteralString]):
+def load_config(file: Union[str, LiteralString]):
     assert os.path.isfile(file), f'{file} does not exist or is not a file!'
 
     with open(file, 'rb') as f:
