@@ -60,16 +60,16 @@ class PreloadDataset(ABC):
             _, patch_picker = self.sample_queue[pos]
             patch_picker.reset()
         else:
-            data = self.get_sample(sample_idx)
+            data = self.get_sample_data(sample_idx)
             coordinate_generator = BalancedCoordinateGenerator(self.n_patches_per_sample,
-                                                               self.get_weight_map(data),
+                                                               self.get_label_data4sampling(data),
                                                                self.patch_size)
 
             patch_picker = WeightedPatchPicker(data, self.patch_size, coordinate_generator)
             self.sample_queue[pos] = (sample_idx, patch_picker)
 
     @abstractmethod
-    def get_sample(self, index):
+    def get_sample_data(self, index):
         """
         Get sample by index from `self.sample_iterator`.
 
@@ -82,7 +82,16 @@ class PreloadDataset(ABC):
         ...
 
     @abstractmethod
-    def get_weight_map(self, data):
+    def get_label_data4sampling(self, data):
+        """
+        Weight for sampling the center of patch on each point.
+
+        Args:
+            data:
+
+        Returns:
+
+        """
         ...
 
     def __iter__(self):

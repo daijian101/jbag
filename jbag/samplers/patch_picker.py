@@ -39,7 +39,8 @@ class WeightedPatchPicker:
         if index >= len(self):
             raise StopIteration
 
-        if isinstance(self.data, Iterable):
+        # Note that np.ndarray and torch.Tensor are also iterable.
+        if isinstance(self.data, Iterable) and not isinstance(self.data, Union[np.ndarray, torch.Tensor]):
             # if the data is a bundle of samples, all ndarray data will be cropped according the candidate coordinate.
             if isinstance(self.data, dict):
                 results = OrderedDict()
@@ -52,7 +53,7 @@ class WeightedPatchPicker:
 
             results = []
             for data in self.data:
-                if isinstance(data, np.ndarray):
+                if isinstance(data, Union[np.ndarray, torch.Tensor]):
                     results.append(central_crop(data, self.coordinates[index], self.patch_size))
                 else:
                     results.append(data)

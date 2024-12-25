@@ -20,7 +20,7 @@ class CoordinateGenerator(ABC):
         ...
 
     @staticmethod
-    def get_margin_mask(image_shape: tuple | list, patch_size: tuple | list):
+    def get_non_margin_region(image_shape: tuple | list, patch_size: tuple | list):
         """
         Build a mask that cover the area which can be view as the central point of the patch with the size of
         patch_size. Mask the central area that can be extracted. Left the margin area.
@@ -41,19 +41,22 @@ class CoordinateGenerator(ABC):
 
 class WeightedCoordinateGenerator(CoordinateGenerator):
 
-    def __init__(self, num_coordinates, patch_size, weight_map):
+    def __init__(self, num_coordinates, weights):
         """
         Choose coordinates according to the weight.
 
         Args:
             num_coordinates (int):
-            patch_size (sequence):
-            weight_map (numpy.ndarray or torch.Tensor):
+            weights (numpy.ndarray or torch.Tensor):
         """
         # number of coordinates that need to be picked.
         self.n = num_coordinates
-        self.patch_size = patch_size
-        self.weight_map = weight_map
+        self.coordinate_system_shape = weights.shape
+        self.a = weights.size
+
+        p = weights / np.sum(weights)
+        self.p = p.flatten()
+
         self.coordinates = self.get_coordinates()
 
     def __getitem__(self, index):
@@ -63,10 +66,8 @@ class WeightedCoordinateGenerator(CoordinateGenerator):
         return self.n
 
     def get_coordinates(self):
-        weight_map = self.weight_map / np.sum(self.weight_map).astype(np.float64)
-        weight_map = weight_map.flatten()
-        coordinates = np.random.choice(weight_map.size, size=self.n, p=weight_map)
-        coordinates = np.asarray(np.unravel_index(coordinates, self.weight_map.shape))
+        coordinates = np.random.choice(self.a, size=self.n, p=self.p)
+        coordinates = np.asarray(np.unravel_index(coordinates, self.coordinate_system_shape))
         return coordinates.T
 
     def regenerate(self):
@@ -74,34 +75,37 @@ class WeightedCoordinateGenerator(CoordinateGenerator):
 
 
 class BalancedCoordinateGenerator(WeightedCoordinateGenerator):
-    def __init__(self, num_coordinates, data, patch_size):
+    def __init__(self, num_coordinates, label_map, patch_size):
         """
         Generate coordinates according to the proportion of categories. In general, the smaller the percentage of
         category, the more likely it is to be taken. Parameter data is the un-one-hot label.
 
         Args:
             num_coordinates (int):
-            data (numpy.ndarray or torch.Tensor): The label matrix. this data will be needed to generate the weight map.
+            label_map (numpy.ndarray or torch.Tensor): The label matrix. this data will be needed to generate the weight map.
             patch_size (sequence):
         """
         self.n = num_coordinates
         self.patch_size = patch_size
-        super().__init__(num_coordinates=num_coordinates, patch_size=patch_size, weight_map=self.get_weight_map(data))
 
-    def get_weight_map(self, data):
+        # for i in range(len(label_map.shape)):
+        #     assert label_map.shape[i] >= patch_size[i]
+        super().__init__(num_coordinates=num_coordinates, weights=self.get_weights(label_map))
+
+    def get_weights(self, label_map):
         # one-hot first
-        weight_map = encode_one_hot(data)
+        label_onehot = encode_one_hot(label_map)
 
         # exclude margin
-        margin_mask = self.get_margin_mask(data.shape, self.patch_size)
-        weight_map = weight_map * margin_mask
-        weight_map = weight_map.astype(np.float32)
+        valid_region = self.get_non_margin_region(label_map.shape, self.patch_size)
+        weights = label_onehot * valid_region
+        weights = weights.astype(np.float32)
 
         # normalize on every category axis
-        category_sum = np.sum(weight_map, axis=tuple(range(1, len(data.shape) + 1)), keepdims=True)
-        weight_map = weight_map / (category_sum + 1)
-        weight_map = np.sum(weight_map, axis=0).astype(np.float32)
-        return weight_map
+        category_sum = np.sum(weights, axis=tuple(range(1, len(label_map.shape) + 1)), keepdims=True)
+        weights = weights / (category_sum + 1)
+        weights = np.sum(weights, axis=0).astype(np.float32)
+        return weights
 
 
 class GridCoordinateGenerator(CoordinateGenerator):
