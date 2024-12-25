@@ -142,7 +142,6 @@ def nifti2dicom(input_nifti_file, output_dicom_dir, modality: Modality, force_ov
     nii2dcm_properties = get_nii2dcm_parameters(nii_data)
     file_name = os.path.splitext(os.path.basename(input_nifti_file))[0]
 
-    file_name = 'nii2dcm_dicom_mri.dcm'
     dicom_ds = get_dicom_dataset(file_name, modality=modality)
     transfer_dicom_series_tags(nii2dcm_properties, dicom_ds)
 
