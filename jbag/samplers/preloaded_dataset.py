@@ -6,7 +6,7 @@ from jbag.samplers.coordinate_generator import BalancedCoordinateGenerator
 from jbag.samplers.patch_picker import WeightedPatchPicker
 
 
-class PreloadedDataset(ABC):
+class PreloadDataset(ABC):
     def __init__(self, samples: list,
                  patch_size,
                  n_patches_per_sample,
