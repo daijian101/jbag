@@ -7,7 +7,7 @@ from torch.nn.functional import grid_sample
 
 from jbag.samplers.utils import central_crop
 from jbag.transforms._utils import get_scalar
-from jbag.transforms.transforms import RandomTransform
+from jbag.transforms import RandomTransform
 
 
 class SpatialTransform(RandomTransform):
@@ -193,34 +193,34 @@ def _create_grid(size: list[int]):
 
 def create_affine_matrix_3d(rotation_angles, scaling_factors):
     # Rotation matrices for each axis
-    Rx = np.array([[1, 0, 0],
+    rotation_x = np.array([[1, 0, 0],
                    [0, np.cos(rotation_angles[0]), -np.sin(rotation_angles[0])],
                    [0, np.sin(rotation_angles[0]), np.cos(rotation_angles[0])]])
 
-    Ry = np.array([[np.cos(rotation_angles[1]), 0, np.sin(rotation_angles[1])],
+    rotation_y = np.array([[np.cos(rotation_angles[1]), 0, np.sin(rotation_angles[1])],
                    [0, 1, 0],
                    [-np.sin(rotation_angles[1]), 0, np.cos(rotation_angles[1])]])
 
-    Rz = np.array([[np.cos(rotation_angles[2]), -np.sin(rotation_angles[2]), 0],
+    rotation_z = np.array([[np.cos(rotation_angles[2]), -np.sin(rotation_angles[2]), 0],
                    [np.sin(rotation_angles[2]), np.cos(rotation_angles[2]), 0],
                    [0, 0, 1]])
 
     # Scaling matrix
-    S = np.diag(scaling_factors)
+    scaling = np.diag(scaling_factors)
 
     # Combine rotation and scaling
-    RS = Rz @ Ry @ Rx @ S
-    return RS
+    affine = rotation_z @ rotation_y @ rotation_x @ scaling
+    return affine
 
 
 def create_affine_matrix_2d(rotation_angle, scaling_factors):
     # Rotation matrix
-    R = np.array([[np.cos(rotation_angle), -np.sin(rotation_angle)],
+    rotation = np.array([[np.cos(rotation_angle), -np.sin(rotation_angle)],
                   [np.sin(rotation_angle), np.cos(rotation_angle)]])
 
     # Scaling matrix
-    S = np.diag(scaling_factors)
+    scaling = np.diag(scaling_factors)
 
     # Combine rotation and scaling
-    RS = R @ S
-    return RS
+    affine = rotation @ scaling
+    return affine

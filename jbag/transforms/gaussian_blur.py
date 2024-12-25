@@ -4,7 +4,7 @@ import torch
 
 from jbag.image.gaussian_filter import gaussian_filter
 from jbag.transforms._utils import get_scalar, get_max_spatial_dims
-from jbag.transforms.transforms import RandomTransform
+from jbag.transforms import RandomTransform
 
 
 class GaussianBlurTransform(RandomTransform):
