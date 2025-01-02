@@ -89,7 +89,8 @@ class BalancedCoordinateGenerator(WeightedCoordinateGenerator):
         self.patch_size = patch_size
 
         for i in range(len(label_map.shape)):
-            assert label_map.shape[i] >= patch_size[i], f'Data size ({label_map.shape[i]}) along dimension {i} must not less than patch size ({patch_size[i]}).'
+            assert label_map.shape[i] >= patch_size[
+                i], f'Data size ({label_map.shape[i]}) along dimension {i} must not less than patch size ({patch_size[i]}).'
         super().__init__(num_coordinates=num_coordinates, weights=self.get_weights(label_map))
 
     def get_weights(self, label_map):

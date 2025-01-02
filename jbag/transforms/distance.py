@@ -1,5 +1,5 @@
 from jbag.metrics import sdf
-from jbag.transforms import Transform
+from jbag.transforms.transform import Transform
 
 
 class SDF(Transform):

@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from jbag.transforms import Transform
+from jbag.transforms.transform import Transform
 
 
 class ToType(Transform):

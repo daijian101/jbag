@@ -1,6 +1,6 @@
 import torch
 
-from jbag.transforms import RandomTransform
+from jbag.transforms.transform import RandomTransform
 
 
 class MirrorTransform(RandomTransform):

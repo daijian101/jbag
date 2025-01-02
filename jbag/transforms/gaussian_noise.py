@@ -3,7 +3,7 @@ from typing import Union
 import torch
 
 from jbag.transforms._utils import get_scalar
-from jbag.transforms import RandomTransform
+from jbag.transforms.transform import RandomTransform
 
 
 class GaussianNoiseTransform(RandomTransform):

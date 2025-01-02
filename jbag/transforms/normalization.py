@@ -1,6 +1,6 @@
 import numpy as np
 
-from jbag.transforms import Transform
+from jbag.transforms.transform import Transform
 
 
 class ZscoreNormalization(Transform):

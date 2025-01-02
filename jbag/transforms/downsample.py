@@ -2,7 +2,7 @@ from typing import Union
 
 from torch.nn.functional import interpolate
 
-from jbag.transforms import Transform
+from jbag.transforms.transform import Transform
 
 
 class DownsampleTransform(Transform):
