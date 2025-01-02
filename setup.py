@@ -2,12 +2,12 @@ import setuptools
 
 setuptools.setup(
     name='jbag',
-    version='4.1.0',
+    version='4.1.1',
     author='Dai Jian',
     author_email='daijian@stumail.ysu.edu.cn',
     description='Tools for medical image processing and deap learning.',
     long_description_content_type='text/markdown',
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(exclude=['tests']),
     classifiers=[
         'Programming Language :: Python :: 3.11',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
