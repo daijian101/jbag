@@ -1,6 +1,5 @@
 import multiprocessing as mp
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from types import FunctionType
 from typing import Union
 
 from tqdm import tqdm
@@ -8,7 +7,7 @@ from tqdm import tqdm
 from jbag import logger
 
 
-def execute(fn: FunctionType,
+def execute(fn,
             processes: int,
             starargs: Union[list[tuple], tuple[tuple]] = (),
             starkwargs: Union[list[dict], tuple[dict]] = (),
