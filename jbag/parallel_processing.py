@@ -43,7 +43,7 @@ def execute(fn,
 
     if processes > mp.cpu_count():
         logger.warn(f'Required number of processes {processes} is greater than the number of processes of CPU. '
-                    f'Set number of processes to {mp.cpu_count()}.')
+                    f'Set the number of processes to the number of CPU processes, {mp.cpu_count()}.')
         processes = mp.cpu_count()
 
     if processes > len(starargs):
