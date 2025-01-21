@@ -22,6 +22,25 @@ def get_margin(patch_size):
                     np.asarray([patch_size / 2 - 1, patch_size / 2])).astype(np.int16).T
 
 
+def get_non_margin_region(image_shape: tuple | list, patch_size: tuple | list):
+    """
+    Build a mask that cover the area which can be view as the central point of the patch with the size of
+    patch_size. Mask the central area that can be extracted. Left the margin area.
+
+    Args:
+        image_shape (sequence):
+        patch_size (sequence):
+
+    Returns:
+
+    """
+    assert len(image_shape) == len(patch_size)
+    margin = get_margin(patch_size)
+    mask = np.zeros(image_shape, dtype=bool)
+    mask[tuple([slice(j[0], i - j[1]) for i, j in zip(image_shape, margin)])] = 1
+    return mask
+
+
 def encode_one_hot(data):
     shape = data.shape
     data = data.flatten().astype(np.uint8)

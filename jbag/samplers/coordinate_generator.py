@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
-from .utils import get_margin, encode_one_hot
+from .utils import get_margin, encode_one_hot, get_non_margin_region
 
 
 class CoordinateGenerator(ABC):
@@ -18,25 +18,6 @@ class CoordinateGenerator(ABC):
     @abstractmethod
     def regenerate(self):
         ...
-
-    @staticmethod
-    def get_non_margin_region(image_shape: tuple | list, patch_size: tuple | list):
-        """
-        Build a mask that cover the area which can be view as the central point of the patch with the size of
-        patch_size. Mask the central area that can be extracted. Left the margin area.
-
-        Args:
-            image_shape (sequence):
-            patch_size (sequence):
-
-        Returns:
-
-        """
-        assert len(image_shape) == len(patch_size)
-        margin = get_margin(patch_size)
-        mask = np.zeros(image_shape, dtype=bool)
-        mask[tuple([slice(j[0], i - j[1]) for i, j in zip(image_shape, margin)])] = 1
-        return mask
 
 
 class WeightedCoordinateGenerator(CoordinateGenerator):
@@ -93,17 +74,17 @@ class BalancedCoordinateGenerator(WeightedCoordinateGenerator):
                 i], f'Data size ({label_map.shape[i]}) along dimension {i} must not less than patch size ({patch_size[i]}).'
         super().__init__(num_coordinates=num_coordinates, weights=self.get_weights(label_map))
 
-    def get_weights(self, label_map):
+    def get_weights(self, weight_label_map):
         # one-hot first
-        label_onehot = encode_one_hot(label_map)
+        label_onehot = encode_one_hot(weight_label_map)
 
         # exclude margin
-        valid_region = self.get_non_margin_region(label_map.shape, self.patch_size)
+        valid_region = get_non_margin_region(weight_label_map.shape, self.patch_size)
         weights = label_onehot * valid_region
         weights = weights.astype(np.float32)
 
         # normalize on every category axis
-        category_sum = np.sum(weights, axis=tuple(range(1, len(label_map.shape) + 1)), keepdims=True)
+        category_sum = np.sum(weights, axis=tuple(range(1, len(weight_label_map.shape) + 1)), keepdims=True)
         weights = weights / (category_sum + 1)
         weights = np.sum(weights, axis=0).astype(np.float32)
         return weights
