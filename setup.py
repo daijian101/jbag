@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='jbag',
-    version='4.1.3',
+    version='4.1.4',
     author='Dai Jian',
     author_email='daijian@stumail.ysu.edu.cn',
     description='Tools for medical image processing and deap learning.',

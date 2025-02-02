@@ -42,12 +42,12 @@ def execute(fn,
         starkwargs = [{}] * n_starargs
 
     if processes > mp.cpu_count():
-        logger.warn(f'Required number of processes {processes} is greater than the number of processes of CPU. '
-                    f'Set the number of processes to the number of CPU processes, {mp.cpu_count()}.')
+        logger.warn(f'Requested number of processes {processes} is greater than the total number of CPU processes. '
+                    f'Set the number of processes to the number of CPU processes {mp.cpu_count()}.')
         processes = mp.cpu_count()
 
     if processes > len(starargs):
-        logger.warn(f'Number of processes {processes} is greater than the number of tasks {len(starargs)}. '
+        logger.warn(f'Request number of processes {processes} is greater than the number of tasks {len(starargs)}. '
                     f'Set number of processes to {len(starargs)}.')
         processes = len(starargs)
 
