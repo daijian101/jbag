@@ -1,5 +1,5 @@
 import os.path
-from typing import Union, LiteralString
+from typing import Union
 
 import torch
 from torch import nn
@@ -20,7 +20,7 @@ def get_unwrapped_model(model: nn.Module):
     return model
 
 
-def save_weights(file: Union[str, LiteralString], model: nn.Module, optimizer: Union[None, Optimizer] = None,
+def save_weights(file: str, model: nn.Module, optimizer: Union[None, Optimizer] = None,
                  **kwargs):
     checkpoint = {MODEL: get_unwrapped_model(model).state_dict()}
     if optimizer:
@@ -33,7 +33,7 @@ def save_weights(file: Union[str, LiteralString], model: nn.Module, optimizer: U
     torch.save(checkpoint, file)
 
 
-def load_weights(file: Union[str, LiteralString], model: Union[nn.Module, None] = None,
+def load_weights(file: str, model: Union[nn.Module, None] = None,
                  optimizer: Union[Optimizer, None] = None):
     assert os.path.isfile(file), f'{file} does not exist or is not a file!'
     checkpoint = torch.load(file)

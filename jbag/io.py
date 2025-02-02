@@ -2,7 +2,7 @@ import json
 import os.path
 from base64 import b64encode, b64decode
 from collections import OrderedDict
-from typing import Union, LiteralString
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -49,7 +49,7 @@ def save_nifti(output_file,
     Save image with nii format.
 
     Args:
-        output_file (str or LiteralString):
+        output_file (str):
         data (numpy.ndarray):
         voxel_spacing (sequence or None, optional, default=None): `tuple(x, y, z)`. Voxel spacing of each axis. If None,
             make `voxel_spacing` as `(1.0, 1.0, 1.0)`.
@@ -83,7 +83,7 @@ def save_nifti(output_file,
     nib.save(nii_img, output_file)
 
 
-def read_dicom_series(input_dir: Union[str, LiteralString]):
+def read_dicom_series(input_dir: str):
     from pydicom import dcmread
 
     assert os.path.exists(input_dir), f'{input_dir} does not exist!'
@@ -143,7 +143,7 @@ def read_json(input_json_file):
     Read and convert `input_json_file`.
 
     Args:
-        input_json_file (str or LiteralString):
+        input_json_file (str):
 
     Returns:
 
@@ -193,7 +193,7 @@ def save_json(output_file, obj, primitive=False, base64=True):
     Convert obj to JSON object and save as file.
 
     Args:
-        output_file (str or LiteralString):
+        output_file (str):
         obj (mapping):
         primitive (bool, optional, default=False): Use primitive type if `True`. In primitive schema, `numpy.ndarray` is
             stored as JSON list and `np.generic` is stored as a number.
@@ -214,8 +214,8 @@ def scp(dst_user, dst_host, dst_path, local_path, dst_port=None, recursive=False
     Args:
         dst_user (str):
         dst_host (str):
-        dst_path (str or LiteralString):
-        local_path (str or LiteralString):
+        dst_path (str):
+        local_path (str):
         dst_port (str or int or None, optional, default=None): If None, usually refer to port 22.
         recursive (bool, default=False): Transmit directories recursively.
         send (bool, default=False): Send file(s) from local to destination.
@@ -245,7 +245,7 @@ def save_excel(output_file, data: Union[dict, pd.DataFrame], sheet_name: str = '
     """
     Save data to Excel file.
     Args:
-        output_file (str or LiteralString):
+        output_file (str):
         data (dict | pd.DataFrame):
         sheet_name (str, optional, default='Sheet1'):
         append (bool, optional, default=False): If True, append to existing file.

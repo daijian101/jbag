@@ -1,7 +1,7 @@
 import os
 import re
 import tomllib
-from typing import Mapping, Union, LiteralString
+from typing import Mapping
 
 
 class Config(Mapping):
@@ -45,7 +45,7 @@ class Config(Mapping):
         return iter(self._config)
 
 
-def load_config(file: Union[str, LiteralString]):
+def load_config(file: str):
     assert os.path.isfile(file), f'{file} does not exist or is not a file!'
 
     with open(file, 'rb') as f:
