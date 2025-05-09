@@ -3,7 +3,7 @@ from typing import Union
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Pt
-from docx.table import _Cell
+from docx.table import _Cell, Table
 
 
 def set_cell(cell: _Cell, text, font='Times New Roman', font_size=10, bold=False, italic=False,
@@ -60,3 +60,27 @@ def set_cell_border(cell: _Cell,
         border_element.set(qn('w:color'), color)
         tcBorders.append(border_element)
     tcPr.append(tcBorders)
+
+
+def set_three_line_border(table: Table,
+                          outer_line_weight: Union[float, int] = 8,
+                          inner_line_weight: Union[float, int] = 4):
+    """
+    Draw three line table borders.
+    Args:
+        table (docx.table.Table):
+        outer_line_weight (float or int, optional, default=8): Line weight for top and bottom borders. Defaults are 1pt.
+        8 indicates 1pt.
+        inner_line_weight (float or int, optional, default=8): Inner line weight. Defaults are 0.5pt. 4 indicates 0.5pt.
+
+    Returns:
+
+    """
+    first_row = table.rows[0]
+    for cell in first_row.cells:
+        set_cell_border(cell, borders=['top'], sizes=outer_line_weight)
+        set_cell_border(cell, borders=['bottom'], sizes=inner_line_weight)
+
+    last_row = table.rows[-1]
+    for cell in last_row.cells:
+        set_cell_border(cell, borders=['bottom'], sizes=outer_line_weight)
