@@ -97,4 +97,5 @@ class AgglomerativeHierarchicalClustering():
                     x.sort()
                     filtered_current_clusters.append(x)
             clusters.append(filtered_current_clusters)
+        clusters.reverse()
         return clusters
