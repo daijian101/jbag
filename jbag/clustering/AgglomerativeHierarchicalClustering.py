@@ -3,7 +3,7 @@ from typing import Callable
 import numpy as np
 
 
-class AgglomerativeHierarchicalClustering():
+class AgglomerativeHierarchicalClustering:
     def __init__(self, metric: Callable[[np.ndarray, np.ndarray], float], linkage: str = "complete",
                  minimum_n_clusters: int = 2):
         """
