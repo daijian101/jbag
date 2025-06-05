@@ -10,8 +10,8 @@ from torch.optim import Optimizer
 from jbag.io import ensure_output_file_dir_existence
 from jbag.log import logger
 
-MODEL = 'model'
-OPTIMIZER = 'optimizer'
+MODEL = "model"
+OPTIMIZER = "optimizer"
 
 
 def get_unwrapped_model(model: nn.Module):
@@ -27,7 +27,7 @@ def save_weights(file: str, model: nn.Module, optimizer: Union[None, Optimizer] 
         checkpoint[OPTIMIZER] = optimizer.state_dict()
     for k, v in kwargs.items():
         if k in checkpoint:
-            raise KeyError(f'Get duplicated key {k}.')
+            raise KeyError(f"Get duplicated key {k}.")
         checkpoint[k] = v
     ensure_output_file_dir_existence(file)
     torch.save(checkpoint, file)
@@ -35,20 +35,20 @@ def save_weights(file: str, model: nn.Module, optimizer: Union[None, Optimizer] 
 
 def load_weights(file: str, model: Union[nn.Module, None] = None,
                  optimizer: Union[Optimizer, None] = None):
-    assert os.path.isfile(file), f'{file} does not exist or is not a file!'
+    assert os.path.isfile(file), f"{file} does not exist or is not a file!"
     checkpoint = torch.load(file)
     if model:
         if MODEL not in checkpoint:
-            logger.warning(f'{file} does not include model weights.')
+            logger.warning(f"{file} does not include model weights.")
         else:
             model = get_unwrapped_model(model)
             model.load_state_dict(checkpoint[MODEL])
-            logger.info(f'Loading model weights from {file}.')
+            logger.info(f"Loading model weights from {file}.")
 
     if optimizer:
         if OPTIMIZER not in checkpoint:
-            logger.warning(f'{file} does not include optimizer weights.')
+            logger.warning(f"{file} does not include optimizer weights.")
         else:
             optimizer.load_state_dict(checkpoint[OPTIMIZER])
-            logger.info(f'Loading optimizer weights from {file}.')
+            logger.info(f"Loading optimizer weights from {file}.")
     return checkpoint

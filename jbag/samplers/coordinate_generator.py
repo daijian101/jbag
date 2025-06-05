@@ -71,7 +71,7 @@ class BalancedCoordinateGenerator(WeightedCoordinateGenerator):
 
         for i in range(len(label_map.shape)):
             assert label_map.shape[i] >= patch_size[
-                i], f'Data size ({label_map.shape[i]}) along dimension {i} must not less than patch size ({patch_size[i]}).'
+                i], f"Data size ({label_map.shape[i]}) along dimension {i} must not less than patch size ({patch_size[i]})."
         super().__init__(num_coordinates=num_coordinates, weights=self.get_weights(label_map))
 
     def get_weights(self, weight_label_map):
@@ -116,7 +116,7 @@ class GridCoordinateGenerator(CoordinateGenerator):
 
         """
         coordinate_dims = [range(0, i, j) for i, j in zip(self.original_shape, self.valid_shape)]
-        coordinates = np.meshgrid(*coordinate_dims, indexing='ij')
+        coordinates = np.meshgrid(*coordinate_dims, indexing="ij")
         coordinates = list(map(lambda x: x.flatten(), coordinates))
         # get the corner coordinate of each patch
         coordinates = np.stack(coordinates, axis=-1)

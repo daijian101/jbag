@@ -354,22 +354,22 @@ def build_unet(network_config: Config):
     norm_op = get_norm_op(network_config.norm_op, network_config.conv_dim)
     non_linear_op = get_non_linear_op(network_config.non_linear)
 
-    params = {'input_channels': network_config.input_channels,
-              'num_classes': network_config.num_classes,
-              'num_stages': network_config.num_stages,
-              'num_features_per_stage': network_config.num_features_per_stage,
-              'conv_op': conv_op,
-              'kernel_sizes': network_config.kernel_sizes,
-              'strides': network_config.strides,
-              'num_conv_per_stage_encoder': network_config.num_conv_per_stage_encoder,
-              'num_conv_per_stage_decoder': network_config.num_conv_per_stage_decoder,
-              'conv_bias': network_config.conv_bias,
-              'norm_op': norm_op,
-              'norm_op_kwargs': network_config.norm_op_kwargs,
-              'non_linear': non_linear_op,
-              'non_linear_kwargs': network_config.non_linear_kwargs,
-              'deep_supervision': network_config.deep_supervision,
-              'non_linear_first': network_config.non_linear_first,
+    params = {"input_channels": network_config.input_channels,
+              "num_classes": network_config.num_classes,
+              "num_stages": network_config.num_stages,
+              "num_features_per_stage": network_config.num_features_per_stage,
+              "conv_op": conv_op,
+              "kernel_sizes": network_config.kernel_sizes,
+              "strides": network_config.strides,
+              "num_conv_per_stage_encoder": network_config.num_conv_per_stage_encoder,
+              "num_conv_per_stage_decoder": network_config.num_conv_per_stage_decoder,
+              "conv_bias": network_config.conv_bias,
+              "norm_op": norm_op,
+              "norm_op_kwargs": network_config.norm_op_kwargs,
+              "non_linear": non_linear_op,
+              "non_linear_kwargs": network_config.non_linear_kwargs,
+              "deep_supervision": network_config.deep_supervision,
+              "non_linear_first": network_config.non_linear_first,
               }
     network = UNet(**params)
 

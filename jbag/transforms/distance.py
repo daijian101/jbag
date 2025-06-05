@@ -1,4 +1,4 @@
-from jbag.metrics import sdf
+import jbag.metrics.SDF
 from jbag.transforms.transform import Transform
 
 
@@ -17,6 +17,6 @@ class SDF(Transform):
     def _call_fun(self, data):
         for key in self.keys:
             segmentation = data[key]
-            sdf_map = sdf(segmentation, self.normalize)
-            data[f'{key}_SDF'] = sdf_map
+            sdf_map = jbag.metrics.SDF.SDF(segmentation, self.normalize)
+            data[f"{key}_SDF"] = sdf_map
         return data

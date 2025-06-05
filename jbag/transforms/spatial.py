@@ -16,7 +16,7 @@ class SpatialTransform(RandomTransform):
                  patch_size=None,
                  patch_center_dist_from_border: Union[int, list[int], tuple[int]] = 0,
                  random_crop: bool = False,
-                 interpolation_modes: Union[str, list[str], tuple[str]] = 'nearest',
+                 interpolation_modes: Union[str, list[str], tuple[str]] = "nearest",
                  p_rotation: float = 0.0,
                  rotation_angle_range: Union[float, list[float], tuple[float, float]] = (0, 2 * np.pi),
                  p_scaling: float = 0.0,
@@ -33,8 +33,8 @@ class SpatialTransform(RandomTransform):
             apply_probability (float):
             patch_size (sequence or None, optional, default=None):
             random_crop (bool, optional, default=False): If True, crop patch image randomly.
-            interpolation_modes (str or sequence(str), optional, default='nearest'): interpolation modes for value of keys.
-            Supported options ``'nearest'`` | ``'bilinear'``.
+            interpolation_modes (str or sequence(str), optional, default="nearest"): interpolation modes for value of keys.
+            Supported options "nearest" | "bilinear".
             p_rotation (float, optional, default=0): Probability of applying rotation.
             rotation_angle_range (float or sequence, optional, default=[0, 2 * np.pi]):
             p_scaling (float, optional, default=0): Probability of applying scaling.
@@ -100,7 +100,7 @@ class SpatialTransform(RandomTransform):
             elif spatial_dims == 2:
                 affine = create_affine_matrix_2d(angles[0], scales)
             else:
-                raise RuntimeError(f'Unsupported dimension: {spatial_dims}')
+                raise RuntimeError(f"Unsupported dimension: {spatial_dims}")
         else:
             affine = None  # this will allow us to detect that we can skip computations
 
@@ -113,7 +113,7 @@ class SpatialTransform(RandomTransform):
                 else [get_scalar(self.elastic_deform_scale)] * spatial_dims
             # sigmas must be in pixels, as this will be applied to the deformation field
             sigmas = [i * j for i, j in zip(deformation_scales, patch_size)]
-            # the magnitude of the deformation field must adhere to the torch's value range for grid_sample, i.e. [-1. 1] and not pixel coordinates. Do not use sigmas here
+            # the magnitude of the deformation field must adhere to the torch"s value range for grid_sample, i.e. [-1. 1] and not pixel coordinates. Do not use sigmas here
             # we need to correct magnitude by grid_scale to account for the fact that the grid will be wrt to the image size but the magnitude should be wrt the patch size. oof.
             magnitude = [
                 get_scalar(self.elastic_deform_magnitude) / grid_scale[i] for i in range(spatial_dims)]
@@ -136,7 +136,7 @@ class SpatialTransform(RandomTransform):
         if self.random_crop:
             for i in range(len(original_spatial_shape)):
                 assert patch_size[i] + self.patch_center_dist_from_border[i] * 2 <= original_spatial_shape[i], \
-                    f'patch_size in spatial dimension {i} is {patch_size[i]}, patch center distance from border is {self.patch_center_dist_from_border[i]}, original shape {original_spatial_shape[i]} does not match the size requirement.'
+                    f"patch_size in spatial dimension {i} is {patch_size[i]}, patch center distance from border is {self.patch_center_dist_from_border[i]}, original shape {original_spatial_shape[i]} does not match the size requirement."
             center_location = []
             for i in range(len(original_spatial_shape)):
                 dist_from_boarder = self.patch_center_dist_from_border[i]
@@ -169,22 +169,22 @@ class SpatialTransform(RandomTransform):
                 dtype = value.dtype
                 if dtype is not torch.float32:
                     value = value.to(torch.float32)
-                value = grid_sample(value[None], grid[None], mode=self.interpolation_modes[i], padding_mode='zeros',
+                value = grid_sample(value[None], grid[None], mode=self.interpolation_modes[i], padding_mode="zeros",
                                     align_corners=False).to(dtype)[0]
             else:
                 if patch_size != original_spatial_shape:
                     value = central_crop(value, center_location, self.patch_size)
             data[key] = value
             if do_grid_sampling:
-                data['spatial'] = True
+                data["spatial"] = True
             else:
-                data['spatial'] = False
+                data["spatial"] = False
         return data
 
 
 def _create_grid(size: list[int]):
     space = [torch.linspace((-s + 1) / s, (s - 1) / s, s) for s in size[::-1]]
-    grid = torch.meshgrid(space, indexing='ij')
+    grid = torch.meshgrid(space, indexing="ij")
     grid = torch.stack(grid, -1)
     spatial_dims = list(range(len(size)))
     grid = grid.permute((*spatial_dims[::-1], len(size)))

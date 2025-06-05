@@ -53,7 +53,7 @@ class UNetPlusPlus(nn.Module):
         filters = [n1, n1 * 2, n1 * 4, n1 * 8, n1 * 16]
 
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+        self.up = nn.Upsample(scale_factor=2, mode="bilinear", align_corners=True)
 
         self.conv0_0 = ConvBlock(input_channels, filters[0], filters[0],
                                  norm_op=norm_op, norm_op_kwargs=norm_op_kwargs,
@@ -135,12 +135,12 @@ def build_unet_plus_plus(network_config: Config):
     norm_op = get_norm_op(network_config.norm_op, network_config.conv_dim)
     non_linear_op = get_non_linear_op(network_config.non_linear)
 
-    params = {'input_channels': network_config.input_channels,
-              'num_classes': network_config.num_classes,
-              'norm_op': norm_op,
-              'norm_op_kwargs': network_config.norm_op_kwargs,
-              'non_linear': non_linear_op,
-              'non_linear_kwargs': network_config.non_linear_kwargs,
+    params = {"input_channels": network_config.input_channels,
+              "num_classes": network_config.num_classes,
+              "norm_op": norm_op,
+              "norm_op_kwargs": network_config.norm_op_kwargs,
+              "non_linear": non_linear_op,
+              "non_linear_kwargs": network_config.non_linear_kwargs,
               }
     network = UNetPlusPlus(**params)
 

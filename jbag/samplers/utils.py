@@ -6,7 +6,7 @@ import torch
 
 def get_margin(patch_size):
     """
-    Determine the margin length that can't be the central point of the patch of which can't fit the size of patch_size.
+    Determine the margin length that cannot be the central point of the patch of which cannot fit the size of patch_size.
     Return a len(patch_size) X 2 matrix with left and right (before and after, top and bottom) margin size.
 
     Args:
@@ -75,7 +75,7 @@ def central_crop(data: Union[np.ndarray, torch.Tensor], center, shape):
     margin = get_margin(shape)[:, 0]
     # coordinate is the corner coordinate responding to the central.
     coordinate = center - margin
-    assert (coordinate >= 0).all(), 'center {} or shape {} error'.format(center, shape)
+    assert (coordinate >= 0).all(), "center {} or shape {} error".format(center, shape)
     cropped = crop_patch(data, coordinate, shape)
     return cropped
 

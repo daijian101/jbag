@@ -1,4 +1,4 @@
-def aggregate_mean_std(mean1, std1, num1, mean2, std2, num2, ddof=1):
+def combined_mean_std(mean1, std1, num1, mean2, std2, num2, ddof=1):
     """
     Calculate the mean and std of a group of data composed by two groups of data, given the mean, the std, and the
     number of data of the two subsets.

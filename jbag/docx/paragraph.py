@@ -8,7 +8,7 @@ def add_paragraph(doc: Document,
                   style=None
                   ):
     if text is None:
-        text = ''
+        text = ""
     p = doc.add_paragraph(text=text, style=style)
     if alignment is not None:
         p.alignment = alignment

@@ -18,11 +18,11 @@ def get_conv_op(dim):
 
 def get_norm_op(op_name, dim):
     match op_name:
-        case 'InstanceNorm':
+        case "InstanceNorm":
             match dim:
                 case 2:
                     return nn.InstanceNorm2d
-        case 'BatchNorm':
+        case "BatchNorm":
             match dim:
                 case 2:
                     return nn.BatchNorm2d
@@ -30,9 +30,9 @@ def get_norm_op(op_name, dim):
 
 def get_non_linear_op(op_name):
     match op_name:
-        case 'leaky_relu':
+        case "leaky_relu":
             return nn.LeakyReLU
-        case 'relu':
+        case "relu":
             return nn.ReLU
 
 
@@ -45,7 +45,7 @@ def get_matching_conv_transpose_op(conv_op: Type[_ConvNd]):
         case nn.Conv3d:
             return nn.ConvTranspose3d
         case _:
-            raise ValueError(f'Unknown conv op {conv_op}')
+            raise ValueError(f"Unknown conv op {conv_op}")
 
 
 def get_conv_dimensions(conv_op: Type[_ConvNd]):
@@ -57,4 +57,4 @@ def get_conv_dimensions(conv_op: Type[_ConvNd]):
         case nn.Conv3d:
             return 3
         case _:
-            raise ValueError(f'Unknown conv op {conv_op}')
+            raise ValueError(f"Unknown conv op {conv_op}")

@@ -12,39 +12,39 @@ from openpyxl import load_workbook
 from jbag import logger
 
 
-def read_mat(input_file, key='scene'):
+def read_mat(input_file, key="scene"):
     from scipy.io import loadmat
-    assert os.path.isfile(input_file), f'{input_file} does not exist or is not a file!'
+    assert os.path.isfile(input_file), f"{input_file} does not exist or is not a file!"
     data = loadmat(input_file)[key]
     return data
 
 
-def save_mat(output_file, data, key='scene'):
+def save_mat(output_file, data, key="scene"):
     from scipy.io import savemat
     ensure_output_file_dir_existence(output_file)
     savemat(output_file, {key: data})
 
 
 def read_txt2list(input_file):
-    assert os.path.isfile(input_file), f'{input_file} does not exist or is not a file!'
+    assert os.path.isfile(input_file), f"{input_file} does not exist or is not a file!"
 
-    with open(input_file, 'r') as input_file:
-        return [each.strip('\n') for each in input_file.readlines()]
+    with open(input_file, "r") as input_file:
+        return [each.strip("\n") for each in input_file.readlines()]
 
 
 def write_list2txt(output_file, data_lst):
     ensure_output_file_dir_existence(output_file)
-    with open(output_file, 'w') as file:
+    with open(output_file, "w") as file:
         for i in range(len(data_lst)):
             file.write(str(data_lst[i]))
             if i != len(data_lst) - 1:
-                file.write('\n')
+                file.write("\n")
 
 
 def save_nifti(output_file,
                data,
                voxel_spacing=None,
-               orientation='LPI'):
+               orientation="LPI"):
     """
     Save image with nii format.
 
@@ -63,9 +63,9 @@ def save_nifti(output_file,
         voxel_spacing = (1.0, 1.0, 1.0)  # replace this with your desired voxel spacing in millimeters
 
     match orientation:
-        case 'LPI':
+        case "LPI":
             affine_matrix = np.diag(list(voxel_spacing) + [1.0])
-        case 'ARI':
+        case "ARI":
             # calculate the affine matrix based on the desired voxel spacing and ARI orientation
             affine_matrix = np.array([
                 [0, -voxel_spacing[0], 0, 0],
@@ -74,7 +74,7 @@ def save_nifti(output_file,
                 [0, 0, 0, 1]
             ])
         case _:
-            raise ValueError(f'Unsupported orientation {orientation}.')
+            raise ValueError(f"Unsupported orientation {orientation}.")
 
     # create a NIfTI image object
     import nibabel as nib
@@ -86,11 +86,11 @@ def save_nifti(output_file,
 def read_dicom_series(input_dir: str):
     from pydicom import dcmread
 
-    assert os.path.exists(input_dir), f'{input_dir} does not exist!'
+    assert os.path.exists(input_dir), f"{input_dir} does not exist!"
 
     instances = []
     for each in os.listdir(input_dir):
-        if each.endswith('.dcm'):
+        if each.endswith(".dcm"):
             instances.append(each)
 
     instances.sort()
@@ -98,7 +98,7 @@ def read_dicom_series(input_dir: str):
     for slice_file_name in instances:
         slice_file = os.path.join(input_dir, slice_file_name)
         dicom_data = dcmread(slice_file)
-        if 'PixelData' in dicom_data:
+        if "PixelData" in dicom_data:
             pixel_data = dicom_data.pixel_array
             images.append(pixel_data)
 
@@ -116,23 +116,23 @@ def np_object_hook(dct):
     Returns:
 
     """
-    if '__ndarray__' in dct:
-        shape = dct['shape']
-        dtype = descr_to_dtype(dct['dtype'])
+    if "__ndarray__" in dct:
+        shape = dct["shape"]
+        dtype = descr_to_dtype(dct["dtype"])
         if shape:
-            order = 'C' if dct['Corder'] else 'F'
-            if dct['base64']:
-                np_obj = np.frombuffer(b64decode(dct['__ndarray__']), dtype=dtype)
+            order = "C" if dct["Corder"] else "F"
+            if dct["base64"]:
+                np_obj = np.frombuffer(b64decode(dct["__ndarray__"]), dtype=dtype)
                 np_obj = np_obj.copy(order=order)
             else:
-                np_obj = np.asarray(dct['__ndarray__'], dtype=dtype, order=order)
+                np_obj = np.asarray(dct["__ndarray__"], dtype=dtype, order=order)
             return np_obj.reshape(shape)
 
-        if dct['base64']:
-            np_obj = np.frombuffer(b64decode(dct['__ndarray__']), dtype=dtype)[0]
+        if dct["base64"]:
+            np_obj = np.frombuffer(b64decode(dct["__ndarray__"]), dtype=dtype)[0]
         else:
             t = getattr(np, dtype.name)
-            np_obj = t(dct['__ndarray__'])
+            np_obj = t(dct["__ndarray__"])
         return np_obj
 
     return dct
@@ -148,9 +148,9 @@ def read_json(input_json_file):
     Returns:
 
     """
-    assert os.path.isfile(input_json_file), f'{input_json_file} does not exist or is not a file!'
+    assert os.path.isfile(input_json_file), f"{input_json_file} does not exist or is not a file!"
 
-    with open(input_json_file, 'r') as json_file:
+    with open(input_json_file, "r") as json_file:
         dct = json.load(json_file, object_hook=np_object_hook)
     return dct
 
@@ -182,7 +182,7 @@ class NumpyJSONEncoder(json.JSONEncoder):
                 dct = OrderedDict(__ndarray__=data_json,
                                   dtype=dtype_to_descr(obj.dtype),
                                   shape=obj.shape,
-                                  Corder=obj.flags['C_CONTIGUOUS'],
+                                  Corder=obj.flags["C_CONTIGUOUS"],
                                   base64=self.base64)
                 return dct
         return super().default(obj)
@@ -203,8 +203,8 @@ def save_json(output_file, obj, primitive=False, base64=True):
 
     """
     ensure_output_file_dir_existence(output_file)
-    with open(output_file, 'w') as file:
-        json.dump(obj, file, cls=NumpyJSONEncoder, **{'primitive': primitive, 'base64': base64})
+    with open(output_file, "w") as file:
+        json.dump(obj, file, cls=NumpyJSONEncoder, **{"primitive": primitive, "base64": base64})
 
 
 def scp(dst_user, dst_host, dst_path, local_path, dst_port=None, recursive=False, send=False, receive=False):
@@ -226,20 +226,20 @@ def scp(dst_user, dst_host, dst_path, local_path, dst_port=None, recursive=False
     """
     assert send ^ receive
 
-    cmd = 'scp'
-    dst = f'{dst_user}@{dst_host}:{dst_path}'
+    cmd = "scp"
+    dst = f"{dst_user}@{dst_host}:{dst_path}"
     if recursive:
-        cmd += ' -r'
+        cmd += " -r"
     if dst_port:
-        cmd += f' -P {dst_port}'
+        cmd += f" -P {dst_port}"
     if send:
-        cmd += f' {local_path} {dst}'
+        cmd += f" {local_path} {dst}"
     else:
-        cmd += f' {dst} {local_path}'
+        cmd += f" {dst} {local_path}"
     os.system(cmd)
 
 
-def save_excel(output_file, data: Union[dict, pd.DataFrame], sheet_name: str = 'Sheet1', append: bool = False,
+def save_excel(output_file, data: Union[dict, pd.DataFrame], sheet_name: str = "Sheet1", append: bool = False,
                overlay_sheet: bool = False,
                column_width: int = None, auto_adjust_width: bool = False, index=False):
     """
@@ -247,7 +247,7 @@ def save_excel(output_file, data: Union[dict, pd.DataFrame], sheet_name: str = '
     Args:
         output_file (str):
         data (dict | pd.DataFrame):
-        sheet_name (str, optional, default='Sheet1'):
+        sheet_name (str, optional, default="Sheet1"):
         append (bool, optional, default=False): If True, append to existing file.
         overlay_sheet (bool, optional, default=False): If True, overwrite existing sheet. Note that this option only works for appending mode.
         column_width (int, optional, default=None): Set column width to the given value, if exist.
@@ -257,14 +257,14 @@ def save_excel(output_file, data: Union[dict, pd.DataFrame], sheet_name: str = '
     Returns:
 
     """
-    write_mode = 'a' if append else 'w'
+    write_mode = "a" if append else "w"
 
-    if write_mode == 'a' and not os.path.exists(output_file):
-        logger.warning(f'Try to append data to a non-existing file: {output_file}, change mode to write instead.')
-        write_mode = 'w'
+    if write_mode == "a" and not os.path.exists(output_file):
+        logger.warning(f"Try to append data to a non-existing file: {output_file}, change mode to write instead.")
+        write_mode = "w"
 
-    if write_mode == 'a' and overlay_sheet:
-        if_sheet_exists = 'overlay'
+    if write_mode == "a" and overlay_sheet:
+        if_sheet_exists = "overlay"
     else:
         if_sheet_exists = None
 
@@ -273,7 +273,7 @@ def save_excel(output_file, data: Union[dict, pd.DataFrame], sheet_name: str = '
 
     ensure_output_file_dir_existence(output_file)
 
-    with pd.ExcelWriter(output_file, engine='openpyxl', mode=write_mode, if_sheet_exists=if_sheet_exists) as writer:
+    with pd.ExcelWriter(output_file, engine="openpyxl", mode=write_mode, if_sheet_exists=if_sheet_exists) as writer:
         data.to_excel(writer, sheet_name=sheet_name, index=index)
 
     if column_width is not None or auto_adjust_width:

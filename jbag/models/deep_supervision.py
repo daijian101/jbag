@@ -35,14 +35,14 @@ def get_deep_supervision_loss_weights(network_config):
 
 
 def get_deep_supervision_scales(network_config):
-    if 'deep_supervision' not in network_config or not network_config['deep_supervision']:
+    if "deep_supervision" not in network_config or not network_config["deep_supervision"]:
         return None
-    strides = network_config['strides']
+    strides = network_config["strides"]
     deep_supervision_scales = list(list(i) for i in 1 / np.cumprod(np.vstack(strides), axis=0))[:-1]
     return deep_supervision_scales
 
 
 def set_deep_supervision(network, flag):
-    if hasattr(network, 'decoder'):
-        if hasattr(network.decoder, 'deep_supervision'):
+    if hasattr(network, "decoder"):
+        if hasattr(network.decoder, "deep_supervision"):
             network.decoder.deep_supervision = flag

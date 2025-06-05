@@ -6,7 +6,7 @@ from docx.shared import Pt
 from docx.table import _Cell, Table
 
 
-def set_cell(cell: _Cell, text, font='Times New Roman', font_size=10, bold=False, italic=False,
+def set_cell(cell: _Cell, text, font="Times New Roman", font_size=10, bold=False, italic=False,
              underline=False):
     cell.text = text
     run = cell.paragraphs[0].runs[0]
@@ -19,9 +19,9 @@ def set_cell(cell: _Cell, text, font='Times New Roman', font_size=10, bold=False
 
 def set_cell_border(cell: _Cell,
                     borders: Union[str, list[str], tuple[float, ...]],
-                    styles: Union[str, list[str], tuple[float, ...]] = 'single',
+                    styles: Union[str, list[str], tuple[float, ...]] = "single",
                     sizes: Union[float, list[float], tuple[float, ...]] = 4,
-                    colors: Union[str, list[str], tuple[str, ...]] = 'auto'):
+                    colors: Union[str, list[str], tuple[str, ...]] = "auto"):
     """
 
     Args:
@@ -36,9 +36,9 @@ def set_cell_border(cell: _Cell,
     if isinstance(borders, str):
         borders = [borders]
 
-    valid_borders = ['top', 'bottom', 'left', 'right']
+    valid_borders = ["top", "bottom", "left", "right"]
     for border in borders:
-        assert border in valid_borders, f'Invalid border: {border}'
+        assert border in valid_borders, f"Invalid border: {border}"
 
     if isinstance(styles, str):
         styles = [styles] * len(borders)
@@ -51,13 +51,13 @@ def set_cell_border(cell: _Cell,
 
     tc = cell._tc
     tcPr = tc.get_or_add_tcPr()
-    tcBorders = OxmlElement('w:tcBorders')
+    tcBorders = OxmlElement("w:tcBorders")
 
     for border, style, size, color in zip(borders, styles, sizes, colors):
-        border_element = OxmlElement(f'w:{border}')
-        border_element.set(qn('w:val'), style)
-        border_element.set(qn('w:sz'), str(size))
-        border_element.set(qn('w:color'), color)
+        border_element = OxmlElement(f"w:{border}")
+        border_element.set(qn("w:val"), style)
+        border_element.set(qn("w:sz"), str(size))
+        border_element.set(qn("w:color"), color)
         tcBorders.append(border_element)
     tcPr.append(tcBorders)
 
@@ -78,9 +78,9 @@ def set_three_line_border(table: Table,
     """
     first_row = table.rows[0]
     for cell in first_row.cells:
-        set_cell_border(cell, borders=['top'], sizes=outer_line_weight)
-        set_cell_border(cell, borders=['bottom'], sizes=inner_line_weight)
+        set_cell_border(cell, borders=["top"], sizes=outer_line_weight)
+        set_cell_border(cell, borders=["bottom"], sizes=inner_line_weight)
 
     last_row = table.rows[-1]
     for cell in last_row.cells:
-        set_cell_border(cell, borders=['bottom'], sizes=outer_line_weight)
+        set_cell_border(cell, borders=["bottom"], sizes=outer_line_weight)

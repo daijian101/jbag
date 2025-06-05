@@ -29,6 +29,6 @@ class DownsampleTransform(Transform):
                     results.append(value)
                 else:
                     new_shape = [round(i * j) for i, j in zip(value.shape[1:], scale)]
-                    results.append(interpolate(value[None].float(), new_shape, mode='nearest-exact')[0].to(value.dtype))
+                    results.append(interpolate(value[None].float(), new_shape, mode="nearest-exact")[0].to(value.dtype))
             data[key] = results
         return data

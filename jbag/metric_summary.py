@@ -25,7 +25,7 @@ class MetricSummary:
             else:
                 return np.mean(self.__evaluations)
         else:
-            raise ValueError('No evaluation exists.')
+            raise ValueError("No evaluation exists.")
 
     def std(self):
         if self.__evaluations:
@@ -34,7 +34,7 @@ class MetricSummary:
             else:
                 return np.std(self.__evaluations)
         else:
-            raise ValueError('No evaluation exists.')
+            raise ValueError("No evaluation exists.")
 
     def count(self):
         return len(self.__evaluations)

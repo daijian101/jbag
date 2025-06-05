@@ -12,7 +12,7 @@ class Config(Mapping):
         try:
             value = self._config[name]
         except KeyError:
-            raise AttributeError(f'The config has no key {name}') from None
+            raise AttributeError(f"The config has no key {name}") from None
         if isinstance(value, Mapping):
             return Config(value)
         return value
@@ -21,7 +21,7 @@ class Config(Mapping):
         try:
             value = self._config[key]
         except KeyError:
-            raise KeyError(f'The config has no key {key}') from None
+            raise KeyError(f"The config has no key {key}") from None
         if isinstance(value, Mapping):
             return Config(value)
         return value
@@ -46,9 +46,9 @@ class Config(Mapping):
 
 
 def load_config(file: str):
-    assert os.path.isfile(file), f'{file} does not exist or is not a file!'
+    assert os.path.isfile(file), f"{file} does not exist or is not a file!"
 
-    with open(file, 'rb') as f:
+    with open(file, "rb") as f:
         config = tomllib.load(f)
     refine_nodes(config, config)
     config = Config(config)
@@ -82,8 +82,8 @@ def replace_str(key, node, root, list_index=None):
     Returns:
 
     """
-    reference_patten = r'(\$\{.+?\})'
-    reference_key_patten = r'\$\{(.+)\}'
+    reference_patten = r"(\$\{.+?\})"
+    reference_key_patten = r"\$\{(.+)\}"
     if list_index is not None:
         value = node[key][list_index]
     else:
@@ -114,7 +114,7 @@ def get_node_key(key, node, root):
     Returns:
 
     """
-    node_hierarchy = key.split('.')
+    node_hierarchy = key.split(".")
     # first, search on current node
     # second, search on root if search failed on current node
 
@@ -126,7 +126,7 @@ def get_node_key(key, node, root):
     node, unpacked_key = search_node(node_hierarchy, node)
     if node and unpacked_key:
         return node, unpacked_key
-    raise ValueError(f'The config has no key {key}')
+    raise ValueError(f"The config has no key {key}")
 
 
 def search_node(node_hierarchy, node):

@@ -2,7 +2,7 @@ from docx.shared import Pt
 from docx.text.paragraph import Paragraph
 
 
-def add_text(paragraph: Paragraph, text: str, font: str = 'Times New Roman', size: int = 10, bold=False, italic=False,
+def add_text(paragraph: Paragraph, text: str, font: str = "Times New Roman", size: int = 10, bold=False, italic=False,
              underline=False, subscript=False, superscript=False):
     run = paragraph.add_run()
     run.font.name = font

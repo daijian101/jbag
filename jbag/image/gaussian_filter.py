@@ -20,7 +20,7 @@ def gaussian_filter(input: torch.Tensor, sigma, axes=None, truncated=4):
     Returns:
         Return tensor array of the same shape as input
     """
-    assert 1 < input.dim() <= 4, 'Input tensor must have 2 to 4 dimensions.'
+    assert 1 < input.dim() <= 4, "Input tensor must have 2 to 4 dimensions."
 
     if axes is None:
         axes = tuple(range(1, input.dim()))
@@ -28,15 +28,15 @@ def gaussian_filter(input: torch.Tensor, sigma, axes=None, truncated=4):
         axes = [axes]
 
     for axis in axes:
-        assert 0 < axis < input.dim(), 'Axis must be within the valid range.'
+        assert 0 < axis < input.dim(), "Axis must be within the valid range."
 
     if isinstance(sigma, (list, tuple)):
-        assert len(sigma) == len(axes), 'Length of sigma must match length of axes.'
+        assert len(sigma) == len(axes), "Length of sigma must match length of axes."
     else:
         sigma = [sigma] * len(axes)
 
     # input.dim() - 1 is spatial dims
-    conv_op = eval(f'F.conv{input.dim() - 1}d')
+    conv_op = eval(f"F.conv{input.dim() - 1}d")
 
     for axis, s in zip(axes, sigma):
         kernel = _build_kernel(s, truncated, dtype=input.dtype)
@@ -46,7 +46,7 @@ def gaussian_filter(input: torch.Tensor, sigma, axes=None, truncated=4):
         padding_shape = [0, 0] * (input.dim() - 1)
         padding_shape[2 * axis - 2:2 * axis] = [len(kernel) // 2] * 2
         padding_shape = padding_shape[::-1]
-        input = F.pad(input, padding_shape, mode='reflect')
+        input = F.pad(input, padding_shape, mode="reflect")
         input = conv_op(input=input, weight=conv_weight, groups=input.shape[0])
     return input
 

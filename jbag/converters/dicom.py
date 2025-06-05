@@ -13,13 +13,13 @@ class Modality(Enum):
 
 def get_dicom_dataset(name, modality: Modality) -> FileDataset:
     file_meta = FileMetaDataset()
-    file_meta.TransferSyntaxUID = '1.2.840.10008.1.2.1'
-    file_meta.ImplementationVersionName = 'DICOM'
+    file_meta.TransferSyntaxUID = "1.2.840.10008.1.2.1"
+    file_meta.ImplementationVersionName = "DICOM"
 
-    ds = FileDataset(name, {}, file_meta=file_meta, preamble=b'\0' * 128)
+    ds = FileDataset(name, {}, file_meta=file_meta, preamble=b"\0" * 128)
     ds.is_implicit_VR = False
     ds.is_little_endian = True
-    ds.ImageType = ['DERIVED', 'SECONDARY']
+    ds.ImageType = ["DERIVED", "SECONDARY"]
 
     # add properties
     patient(ds)
@@ -37,8 +37,8 @@ def get_dicom_dataset(name, modality: Modality) -> FileDataset:
 
     # set datatime
     dt = datetime.datetime.now()
-    date_str = dt.strftime('%Y%m%d')
-    time_str = dt.strftime('%H%M%S.%f')  # long format with micro seconds
+    date_str = dt.strftime("%Y%m%d")
+    time_str = dt.strftime("%H%M%S.%f")  # long format with micro seconds
 
     ds.ContentDate = date_str
     ds.ContentTime = time_str
@@ -51,43 +51,43 @@ def get_dicom_dataset(name, modality: Modality) -> FileDataset:
     ds.InstanceCreationDate = date_str
     ds.InstanceCreationTime = time_str
 
-    ds.RescaleIntercept = ''
-    ds.RescaleSlope = ''
+    ds.RescaleIntercept = ""
+    ds.RescaleSlope = ""
 
     return ds
 
 
 def patient(ds: Dataset):
-    ds.PatientName = 'Patient Name'
-    ds.PatientID = '1'
-    ds.PatientSex = ''
-    ds.PatientBirthDate = ''
+    ds.PatientName = "Patient Name"
+    ds.PatientID = "1"
+    ds.PatientSex = ""
+    ds.PatientBirthDate = ""
 
 
 def general_study(ds: Dataset):
     ds.StudyInstanceUID = generate_uid()
-    ds.StudyDescription = ''
-    ds.ReferringPhysicianName = ''
+    ds.StudyDescription = ""
+    ds.ReferringPhysicianName = ""
 
 
 def patient_study(ds: Dataset):
-    ds.PatientAge = ''
-    ds.PatientWeight = ''
+    ds.PatientAge = ""
+    ds.PatientWeight = ""
 
 
 def general_series(ds: Dataset, file_meta: FileMetaDataset, modality: Modality):
     ds.Modality = modality.name
     match modality:
         case Modality.CT:
-            file_meta.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.2'
-            ds.SOPClassUID = '1.2.840.10008.5.1.4.1.1.2'
+            file_meta.MediaStorageSOPClassUID = "1.2.840.10008.5.1.4.1.1.2"
+            ds.SOPClassUID = "1.2.840.10008.5.1.4.1.1.2"
             CT_image(ds)
 
     ds.SeriesInstanceUID = generate_uid(None)
     ds.SeriesNumber = str(randint(1000, 9999))
-    ds.ProtocolName = 'DICOM'
-    ds.PatientPosition = ''
-    ds.AccessionNumber = '123456'
+    ds.ProtocolName = "DICOM"
+    ds.PatientPosition = ""
+    ds.AccessionNumber = "123456"
 
 
 def frame_of_reference(ds: Dataset):
@@ -95,34 +95,34 @@ def frame_of_reference(ds: Dataset):
 
 
 def general_equipment(ds: Dataset):
-    ds.Manufacturer = ''
-    ds.InstitutionName = 'INSTITUTION_NAME_UNDEFINED'
-    ds.ManufacturerModelName = ''
-    ds.SoftwareVersions = ''
+    ds.Manufacturer = ""
+    ds.InstitutionName = "INSTITUTION_NAME_UNDEFINED"
+    ds.ManufacturerModelName = ""
+    ds.SoftwareVersions = ""
 
 
 def general_image(ds: Dataset):
-    ds.InstanceNumber = ''
-    ds.PatientOrientation = ''
-    ds.ContentDate = ''
-    ds.ContentTime = ''
-    ds.ImageType = ['SECONDARY', 'DERIVED']
-    ds.LossyImageCompression = '00'
+    ds.InstanceNumber = ""
+    ds.PatientOrientation = ""
+    ds.ContentDate = ""
+    ds.ContentTime = ""
+    ds.ImageType = ["SECONDARY", "DERIVED"]
+    ds.LossyImageCompression = "00"
 
 
 def general_acquisition(ds: Dataset):
-    ds.AcquisitionNumber = ''
-    ds.AcquisitionDate = ''
-    ds.AcquisitionTime = ''
+    ds.AcquisitionNumber = ""
+    ds.AcquisitionDate = ""
+    ds.AcquisitionTime = ""
 
 
 def image_plane(ds: Dataset):
-    ds.PixelSpacing = ''
-    ds.ImageOrientationPatient = ['1', '0', '0', '0', '1', '0']
-    ds.ImagePositionPatient = ['0', '0', '0']
-    ds.SliceThickness = ''
-    ds.SpacingBetweenSlices = ''
-    ds.SliceLocation = ''
+    ds.PixelSpacing = ""
+    ds.ImageOrientationPatient = ["1", "0", "0", "0", "1", "0"]
+    ds.ImagePositionPatient = ["0", "0", "0"]
+    ds.SliceThickness = ""
+    ds.SpacingBetweenSlices = ""
+    ds.SliceLocation = ""
 
 
 def image_pixel(ds: Dataset):
@@ -135,32 +135,32 @@ def image_pixel(ds: Dataset):
 
     ds.PixelRepresentation = 0
 
-    ds.SmallestImagePixelValue = ''
-    ds.LargestImagePixelValue = ''
+    ds.SmallestImagePixelValue = ""
+    ds.LargestImagePixelValue = ""
 
-    ds.PixelData = ''
+    ds.PixelData = ""
 
 
 def SOP_common(ds: Dataset):
-    ds.SOPClassUID = ''
-    ds.SOPInstanceUID = ''
+    ds.SOPClassUID = ""
+    ds.SOPInstanceUID = ""
 
-    ds.SpecificCharacterSet = 'ISO_IR 100'
-    ds.InstanceCreationDate = ''
-    ds.InstanceCreationTime = ''
+    ds.SpecificCharacterSet = "ISO_IR 100"
+    ds.InstanceCreationDate = ""
+    ds.InstanceCreationTime = ""
 
-    ds.InstanceCreatorUID = ''
+    ds.InstanceCreatorUID = ""
 
 
 def VOI_LUT(ds: Dataset):
-    ds.WindowCenter = ''
-    ds.WindowWidth = ''
+    ds.WindowCenter = ""
+    ds.WindowWidth = ""
 
 
 def CT_image(ds: Dataset):
     ds.SamplesPerPixel = 1
 
-    ds.PhotometricInterpretation = 'MONOCHROME2'
+    ds.PhotometricInterpretation = "MONOCHROME2"
 
     ds.BitsAllocated = 16
     ds.BitsStored = 12
