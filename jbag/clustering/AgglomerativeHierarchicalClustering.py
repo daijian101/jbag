@@ -5,7 +5,7 @@ import numpy as np
 
 class AgglomerativeHierarchicalClustering:
     def __init__(self, metric: Callable[[np.ndarray, np.ndarray], float], linkage: str = "complete",
-                 minimum_n_clusters: int = 2):
+                 n_clusters: int = 2):
         """
         Agglomerative hierarchical clustering algorithm. Only "complete" linkage is supported for now.
         Note that `sklearn.cluster.AgglomerativeClustering` is much faster, this implementation is used when
@@ -13,22 +13,29 @@ class AgglomerativeHierarchicalClustering:
         represented by a matrix/tensor with feature dimensions greater than 1. While AgglomerativeClustering in sklearn
         only supports data shape of (n_samples, n_features).
 
-
         Args:
             metric (Callable[[np.ndarray, np.ndarray], float]): metric function for measuring element distance.
             linkage (str, optional, default="complete"): Currently, only "complete" is supported.
-            minimum_n_clusters  (int, optional, default=1): The minimum number of clusters for clustering.
+            n_clusters  (int, optional, default=1): The number of clusters for clustering.
         """
         supported_linkages = ["complete"]
         if linkage not in supported_linkages:
             raise ValueError(f"linkage must be one of {supported_linkages}")
-        if minimum_n_clusters < 2:
+        if n_clusters < 2:
             raise ValueError(f"Minimum number of clusters must be >= 2")
         self.metric = metric
         self.linkage = linkage
-        self.minimum_n_clusters = minimum_n_clusters
+        self.n_clusters = n_clusters
 
     def fit(self, X):
+        """
+        Perform agglomerative hierarchical clustering on `X`.
+        Args:
+            X (np.ndarray): The input data `X` is expected to have be (n_samples, ...).
+
+        Returns:
+        The clustering with desired number of clusters and the full grouping tree.
+        """
         n_samples = X.shape[0]
 
         if n_samples < 2:
@@ -44,7 +51,7 @@ class AgglomerativeHierarchicalClustering:
 
         np.fill_diagonal(cluster_distance, np.inf)
 
-        k_steps = n_samples - self.minimum_n_clusters
+        k_steps = n_samples - self.n_clusters
         linkage_matrix = np.zeros((k_steps, 2), dtype=int)
 
         # active_cluster_indices is the unmerged cluster indices
@@ -77,7 +84,8 @@ class AgglomerativeHierarchicalClustering:
             cluster_distance[j_idx, :] = np.inf
             cluster_distance[:, j_idx] = np.inf
 
-        return self.get_clusters(linkage_matrix, n_samples)
+        clusterings = self.get_clusters(linkage_matrix, n_samples)
+        return clusterings[0], clusterings
 
     @staticmethod
     def get_clusters(linkage_matrix, n_samples: int):
