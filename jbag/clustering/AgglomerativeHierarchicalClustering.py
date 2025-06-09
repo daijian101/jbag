@@ -5,7 +5,7 @@ import numpy as np
 
 class AgglomerativeHierarchicalClustering:
     def __init__(self, metric: Callable[[np.ndarray, np.ndarray], float], linkage: str = "complete",
-                 n_clusters: int = 2):
+                 n_clusters: int = 1):
         """
         Agglomerative hierarchical clustering algorithm. Only "complete" linkage is supported for now.
         Note that `sklearn.cluster.AgglomerativeClustering` is much faster, this implementation is used when
@@ -21,8 +21,8 @@ class AgglomerativeHierarchicalClustering:
         supported_linkages = ["complete"]
         if linkage not in supported_linkages:
             raise ValueError(f"linkage must be one of {supported_linkages}")
-        if n_clusters < 2:
-            raise ValueError(f"Minimum number of clusters must be >= 2")
+        if n_clusters < 1:
+            raise ValueError(f"Minimum number of clusters must be >= 1")
         self.metric = metric
         self.linkage = linkage
         self.n_clusters = n_clusters
