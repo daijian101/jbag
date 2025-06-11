@@ -26,9 +26,9 @@ def set_cell_border(cell: _Cell,
 
     Args:
         cell:
-        borders: Option: top, bottom, left, right
+        borders: Option: top, bottom, left, right.
         styles:
-        sizes: 4 is equal to 0.5pt in word software
+        sizes: 4 is equal to 0.5 pt, 8 for 1 pt.
 
     Returns:
 
@@ -69,9 +69,9 @@ def set_three_line_border(table: Table,
     Draw three line table borders.
     Args:
         table (docx.table.Table):
-        outer_line_weight (float or int, optional, default=8): Line weight for top and bottom borders. Defaults are 1pt.
-        8 indicates 1pt.
-        inner_line_weight (float or int, optional, default=8): Inner line weight. Defaults are 0.5pt. 4 indicates 0.5pt.
+        outer_line_weight (float or int, optional, default=8): Line weight for top and bottom borders. Defaults are 1 pt.
+        8 indicates 1 pt.
+        inner_line_weight (float or int, optional, default=8): Inner line weight. Defaults are 0.5 pt. 4 indicates 0.5 pt.
 
     Returns:
 
