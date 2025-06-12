@@ -6,8 +6,30 @@ from docx.shared import Pt
 from docx.table import _Cell, Table
 
 
+def cm_to_dxa(cm):
+    """
+    Convert centimeters to twentieths of a point (dxa).
+    """
+    return int(cm * 1440 / 2.54)
+
+
 def set_cell(cell: _Cell, text, font="Times New Roman", font_size=10, bold=False, italic=False,
-             underline=False):
+             underline=False, cell_margins: list[float] = None):
+    """
+    Set cell text and properties.
+    Args:
+        cell (docx.table._Cell):
+        text (str):
+        font (str, optional, default="Times New Roman"):
+        font_size (int, optional, default=10):
+        bold (bool, optional, default=False):
+        italic (bool, optional, default=False):
+        underline (bool, optional, default=False):
+        cell_margins (list, optional, default=[]): The cell margins should be in the format of [left, right, top, bottom] in the unit of centimeter.
+
+    Returns:
+
+    """
     cell.text = text
     run = cell.paragraphs[0].runs[0]
     run.font.name = font
@@ -15,6 +37,28 @@ def set_cell(cell: _Cell, text, font="Times New Roman", font_size=10, bold=False
     run.font.bold = bold
     run.font.italic = italic
     run.font.underline = underline
+    if cell_margins:
+        tc = cell._tc
+        tcPr = tc.get_or_add_tcPr()
+
+        tcMar = tcPr.find(qn("w:tcMar"))
+        if tcMar is None:
+            tcMar = OxmlElement("w:tcMar")
+            tcPr.append(tcMar)
+
+        margin_keys = ["left", "right", "top", "bottom"]
+        for i, value in enumerate(cell_margins):
+            if value is None:
+                continue
+
+            tag = "w:{}".format(margin_keys[i])
+            margin_element = tcMar.find(qn(tag))
+            if margin_element is None:
+                margin_element = OxmlElement(tag)
+                tcMar.append(margin_element)
+            value = cm_to_dxa(value)
+            margin_element.set(qn("w:w"), str(value))
+            margin_element.set(qn("w:type"), "dxa")
 
 
 def set_cell_border(cell: _Cell,
