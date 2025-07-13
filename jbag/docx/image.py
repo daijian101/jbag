@@ -11,7 +11,8 @@ def add_image(image_file,
               paragraph: Union[Paragraph, None] = None,
               width: float = 5,
               center: bool = True):
-    assert os.path.isfile(image_file), f"{image_file} does not exist or is not a file!"
+    if not os.path.isfile(image_file):
+        raise FileNotFoundError(f"Input image file {image_file} does not exist.")
 
     assert not all([doc is None, paragraph is None])
 

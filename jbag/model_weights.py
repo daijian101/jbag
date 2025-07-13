@@ -33,22 +33,23 @@ def save_weights(file: str, model: nn.Module, optimizer: Union[None, Optimizer] 
     torch.save(checkpoint, file)
 
 
-def load_weights(file: str, model: Union[nn.Module, None] = None,
-                 optimizer: Union[Optimizer, None] = None):
-    assert os.path.isfile(file), f"{file} does not exist or is not a file!"
-    checkpoint = torch.load(file)
+def load_weights(input_weights_file: str, model: Union[nn.Module, None] = None,
+                 optimizer: Union[Optimizer, None] = None, map_location = None):
+    if not os.path.isfile(input_weights_file):
+        raise FileNotFoundError(f"Input weights file {input_weights_file} does not exist.")
+    checkpoint = torch.load(input_weights_file, map_location=map_location)
     if model:
         if MODEL not in checkpoint:
-            logger.warning(f"{file} does not include model weights.")
+            logger.warning(f"{input_weights_file} does not include model weights.")
         else:
             model = get_unwrapped_model(model)
             model.load_state_dict(checkpoint[MODEL])
-            logger.info(f"Loading model weights from {file}.")
+            logger.info(f"Loading model weights from {input_weights_file}.")
 
     if optimizer:
         if OPTIMIZER not in checkpoint:
-            logger.warning(f"{file} does not include optimizer weights.")
+            logger.warning(f"{input_weights_file} does not include optimizer weights.")
         else:
             optimizer.load_state_dict(checkpoint[OPTIMIZER])
-            logger.info(f"Loading optimizer weights from {file}.")
+            logger.info(f"Loading optimizer weights from {input_weights_file}.")
     return checkpoint

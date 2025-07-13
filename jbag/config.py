@@ -45,10 +45,11 @@ class Config(Mapping):
         return iter(self._config)
 
 
-def load_config(file: str):
-    assert os.path.isfile(file), f"{file} does not exist or is not a file!"
+def load_config(config_file: str):
+    if not os.path.isfile(config_file):
+        raise FileNotFoundError(f"Config file {config_file} does not exist.")
 
-    with open(file, "rb") as f:
+    with open(config_file, "rb") as f:
         config = tomllib.load(f)
     refine_nodes(config, config)
     config = Config(config)

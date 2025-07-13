@@ -27,8 +27,9 @@ def execute(fn,
     Returns:
 
     """
-    assert mp_context_method in ["fork", "spawn", "forkserver", None], \
-        f"Unsupported multiprocessing context method: {mp_context_method}."
+    if not mp_context_method in ["fork", "spawn", "forkserver", None]:
+        raise ValueError(
+            f"Unsupported multi-processing context method: {mp_context_method}. Supported methods: fork, spawn, forkserver, and None for default")
 
     n_starargs = len(starargs)
     n_starkwds = len(starkwargs)

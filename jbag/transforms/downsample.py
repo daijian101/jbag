@@ -23,7 +23,9 @@ class DownsampleTransform(Transform):
             for scale in self.scales:
                 if not isinstance(scale, (list, tuple)):
                     scale = [scale] * (value.ndim - 1)
-                assert len(scale) == value.ndim - 1
+                if len(scale) != value.ndim - 1:
+                    raise ValueError(
+                        f"Number of scales ({len(scale)}) must be equal to number of data dimensions ({value.ndim - 1}).")
 
                 if all([i == 1 for i in scale]):
                     results.append(value)

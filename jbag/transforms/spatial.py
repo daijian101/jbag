@@ -76,7 +76,9 @@ class SpatialTransform(RandomTransform):
         original_spatial_shape = data[self.keys[0]].shape[1:]
         spatial_dims = len(original_spatial_shape)
         patch_size = self.patch_size if self.patch_size is not None else original_spatial_shape
-        assert len(original_spatial_shape) == len(patch_size)
+        if len(original_spatial_shape) != len(patch_size):
+            raise ValueError(
+                f"Patch size dimensions ({len(patch_size)}) must match original spatial dimensions ({len(original_spatial_shape)}) of data.")
 
         do_rotation = np.random.random_sample() < self.p_rotation
         do_scale = np.random.random_sample() < self.p_scaling

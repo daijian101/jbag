@@ -82,7 +82,8 @@ def set_cell_border(cell: _Cell,
 
     valid_borders = ["top", "bottom", "left", "right"]
     for border in borders:
-        assert border in valid_borders, f"Invalid border: {border}"
+        if border not in valid_borders:
+            raise ValueError(f"Invalid border type: {border}. Supported are : {', '.join(valid_borders)}")
 
     if isinstance(styles, str):
         styles = [styles] * len(borders)

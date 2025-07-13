@@ -13,8 +13,9 @@ from jbag import logger
 
 
 def read_mat(input_file, key="scene"):
+    if not os.path.isfile(input_file):
+        raise FileNotFoundError(f"Input file {input_file} does not exist.")
     from scipy.io import loadmat
-    assert os.path.isfile(input_file), f"{input_file} does not exist or is not a file!"
     data = loadmat(input_file)[key]
     return data
 
@@ -26,7 +27,8 @@ def save_mat(output_file, data, key="scene"):
 
 
 def read_txt2list(input_file):
-    assert os.path.isfile(input_file), f"{input_file} does not exist or is not a file!"
+    if not os.path.isfile(input_file):
+        raise FileNotFoundError(f"Input file {input_file} does not exist.")
 
     with open(input_file, "r") as input_file:
         return [each.strip("\n") for each in input_file.readlines()]
@@ -86,7 +88,8 @@ def save_nifti(output_file,
 def read_dicom_series(input_dir: str):
     from pydicom import dcmread
 
-    assert os.path.exists(input_dir), f"{input_dir} does not exist!"
+    if not os.path.exists(input_dir):
+        raise ValueError(f"{input_dir} does not exist.")
 
     instances = []
     for each in os.listdir(input_dir):
@@ -148,7 +151,8 @@ def read_json(input_json_file):
     Returns:
 
     """
-    assert os.path.isfile(input_json_file), f"{input_json_file} does not exist or is not a file!"
+    if not os.path.isfile(input_json_file):
+        raise FileNotFoundError(f"Input file {input_json_file} does not exist.")
 
     with open(input_json_file, "r") as json_file:
         dct = json.load(json_file, object_hook=np_object_hook)
@@ -224,7 +228,8 @@ def scp(dst_user, dst_host, dst_path, local_path, dst_port=None, recursive=False
     Returns:
 
     """
-    assert send ^ receive
+    if not (send ^ receive):
+        raise ValueError(f"Send and receive must be exclusive.")
 
     cmd = "scp"
     dst = f"{dst_user}@{dst_host}:{dst_path}"

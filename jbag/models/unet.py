@@ -39,8 +39,14 @@ class UNet(nn.Module):
         if isinstance(num_conv_per_stage_decoder, int):
             num_conv_per_stage_decoder = [num_conv_per_stage_decoder] * (num_stages - 1)
 
-        assert len(num_conv_per_stage_encoder) == num_stages
-        assert len(num_conv_per_stage_decoder) == num_stages - 1
+        if len(num_conv_per_stage_encoder) != num_stages:
+            raise ValueError(
+                f"Number of encoder blocks ({len(num_conv_per_stage_encoder)}) must be equal to number of stages ({num_stages}).")
+
+        if len(num_conv_per_stage_decoder) != num_stages - 1:
+            raise ValueError(
+                f"Number of decoder blocks ({len(num_conv_per_stage_decoder)}) must be equal to stages - 1 ({num_stages - 1}).")
+
         self.encoder = Encoder(input_channels=input_channels,
                                num_stages=num_stages,
                                num_features_per_stage=num_features_per_stage,
@@ -98,10 +104,18 @@ class Encoder(nn.Module):
         if isinstance(strides, int):
             strides = [strides] * num_stages
 
-        assert len(kernel_sizes) == num_stages
-        assert len(num_features_per_stage) == num_stages
-        assert len(num_conv_per_stage) == num_stages
-        assert len(strides) == num_stages
+        if len(kernel_sizes) != num_stages:
+            raise ValueError(
+                f"Number of kernels ({len(kernel_sizes)}) must be equal to number of stages ({num_stages}).")
+        if len(num_features_per_stage) != num_stages:
+            raise ValueError(
+                f"Number of stage feature sizes ({len(num_features_per_stage)}) must be equal to number of stages ({num_stages}).")
+        if len(num_conv_per_stage) != num_stages:
+            raise ValueError(
+                f"Number of stage conv numbers ({len(num_conv_per_stage)}) must be equal to number of stages ({num_stages}).")
+        if len(strides) == num_stages:
+            raise ValueError(
+                f"Number of strides ({len(strides)}) must be equal to number of stages ({num_stages}).")
 
         stages = []
         for i in range(num_stages):
@@ -167,7 +181,10 @@ class Decoder(nn.Module):
         num_stages_encoder = len(encoder.output_channels)
         if isinstance(num_conv_per_stage, int):
             num_conv_per_stage = [num_conv_per_stage] * (num_stages_encoder - 1)
-        assert len(num_conv_per_stage) == num_stages_encoder - 1
+
+        if len(num_conv_per_stage) != num_stages_encoder - 1:
+            raise ValueError(
+                f"Number of decoder blocks ({len(num_conv_per_stage)}) must be equal to number of encoder blocks - 1 ({num_stages_encoder - 1}).")
         conv_transpose_op = get_matching_conv_transpose_op(encoder.conv_op)
         conv_bias = encoder.conv_bias if conv_bias is None else conv_bias
         norm_op = encoder.norm_op if norm_op is None else norm_op

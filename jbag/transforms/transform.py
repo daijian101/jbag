@@ -5,7 +5,8 @@ import numpy as np
 
 class Transform(ABC):
     def __init__(self, keys):
-        assert keys
+        if not keys:
+            raise ValueError("Keys cannot be empty.")
         if isinstance(keys, str):
             keys = [keys]
         self.keys = keys

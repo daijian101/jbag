@@ -128,14 +128,15 @@ def nifti2dicom(input_nifti_file, output_dicom_dir, modality: Modality, force_ov
 
     """
 
-    assert os.path.isfile(input_nifti_file), f"{input_nifti_file} does not exist or is not a file!"
+    if not os.path.isfile(input_nifti_file):
+        raise FileNotFoundError(f"Input NIfTI file {input_nifti_file} does not exist.")
 
     if os.path.exists(output_dicom_dir):
         if force_overwrite:
-            logger.info(f"Overwrite {output_dicom_dir} as it already exists.")
+            logger.info(f"Overwrite output DICOM dir {output_dicom_dir} as it already exists.")
             shutil.rmtree(output_dicom_dir)
         else:
-            raise FileExistsError(f"{output_dicom_dir} already exists.")
+            raise ValueError(f"Output DICOM series dir {output_dicom_dir} already exists.")
 
     nii_data = nib.load(input_nifti_file)
 

@@ -20,7 +20,8 @@ def gaussian_filter(input: torch.Tensor, sigma, axes=None, truncated=4):
     Returns:
         Return tensor array of the same shape as input
     """
-    assert 1 < input.dim() <= 4, "Input tensor must have 2 to 4 dimensions."
+    if not (1 < input.dim() <= 4):
+        raise ValueError(f"Dimensions of input must be in the range of (1, 4], got {input.dim()}.")
 
     if axes is None:
         axes = tuple(range(1, input.dim()))
@@ -28,10 +29,12 @@ def gaussian_filter(input: torch.Tensor, sigma, axes=None, truncated=4):
         axes = [axes]
 
     for axis in axes:
-        assert 0 < axis < input.dim(), "Axis must be within the valid range."
+        if not (0 < axis < input.dim()):
+            raise ValueError(f"Axis must be in range of (0, {input.dim()}), got {axis}.")
 
     if isinstance(sigma, (list, tuple)):
-        assert len(sigma) == len(axes), "Length of sigma must match length of axes."
+        if len(sigma) != len(axes):
+            raise ValueError(f"Number of sigmas must equal to the length of axes ({len(axes)}).")
     else:
         sigma = [sigma] * len(axes)
 
