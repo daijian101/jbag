@@ -113,7 +113,7 @@ class Encoder(nn.Module):
         if len(num_conv_per_stage) != num_stages:
             raise ValueError(
                 f"Number of stage conv numbers ({len(num_conv_per_stage)}) must be equal to number of stages ({num_stages}).")
-        if len(strides) == num_stages:
+        if len(strides) != num_stages:
             raise ValueError(
                 f"Number of strides ({len(strides)}) must be equal to number of stages ({num_stages}).")
 
