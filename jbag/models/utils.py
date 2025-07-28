@@ -26,6 +26,7 @@ def get_norm_op(op_name, dim):
             match dim:
                 case 2:
                     return nn.BatchNorm2d
+    return None
 
 
 def get_non_linear_op(op_name):
@@ -34,6 +35,7 @@ def get_non_linear_op(op_name):
             return nn.LeakyReLU
         case "relu":
             return nn.ReLU
+    return None
 
 
 def get_matching_conv_transpose_op(conv_op: Type[_ConvNd]):
