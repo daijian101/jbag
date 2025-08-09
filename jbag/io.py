@@ -10,18 +10,23 @@ from numpy.lib.format import dtype_to_descr, descr_to_dtype
 from openpyxl import load_workbook
 
 from jbag import logger
+from scipy.io import loadmat
+from scipy.io import savemat
+import nibabel as nib
+from pydicom import dcmread
+
+from jbag.dicom_tags import Rescale_Slope, Rescale_Intercept, Pixel_Padding_Value, Smallest_Image_Pixel_Value
 
 
 def read_mat(input_file, key="scene"):
     if not os.path.isfile(input_file):
         raise FileNotFoundError(f"Input file {input_file} does not exist.")
-    from scipy.io import loadmat
+
     data = loadmat(input_file)[key]
     return data
 
 
 def save_mat(output_file, data, key="scene"):
-    from scipy.io import savemat
     ensure_output_file_dir_existence(output_file)
     savemat(output_file, {key: data})
 
@@ -79,14 +84,26 @@ def save_nifti(output_file,
             raise ValueError(f"Unsupported orientation {orientation}.")
 
     # create a NIfTI image object
-    import nibabel as nib
+
     ensure_output_file_dir_existence(output_file)
     nii_img = nib.Nifti1Image(data, affine=affine_matrix)
     nib.save(nii_img, output_file)
 
 
-def read_dicom_series(input_dir: str):
-    from pydicom import dcmread
+def read_dicom_series(input_dir: str, use_HU: bool = True, replace_padding: bool = True):
+    """
+    Read DICOM image. If `use_hu` is True, the image in HU will be returned, in which the value is rescale by `value * rescale_slope + rescale_intercept`.
+
+    Args:
+        input_dir (str):
+        use_HU (boo, optional, default=True): If True, rescale the image in HU.
+        replace_padding (bool, optional, default=True): If True, rescale the padding value of out-of-field (DICOM tag: (0028,0120)) if exists.
+        The padding value will be replaced by the value of Smallest Image Pixel Value (DICOM tag: 0028, 0106) if the tag exists.
+        Otherwise, the padding value will be replaced by the smallest value in the pixel data except the padding value.
+
+    Returns:
+
+    """
 
     if not os.path.exists(input_dir):
         raise ValueError(f"{input_dir} does not exist.")
@@ -100,12 +117,46 @@ def read_dicom_series(input_dir: str):
     images = []
     for slice_file_name in instances:
         slice_file = os.path.join(input_dir, slice_file_name)
-        dicom_data = dcmread(slice_file)
-        if "PixelData" in dicom_data:
-            pixel_data = dicom_data.pixel_array
-            images.append(pixel_data)
+        ds = dcmread(slice_file)
+        slope = 1
+        intercept = 0
+        if use_HU:
+            if Rescale_Slope in ds:
+                slope = ds[Rescale_Slope].value
+            else:
+                logger.warning(f"Dicom file {slice_file} does not contain rescale slope. Set rescale slope to 1.")
+            if Rescale_Intercept in ds:
+                intercept = ds[Rescale_Intercept].value
+            else:
+                logger.warning(
+                    f"Dicom file {slice_file} does not contain rescale intercept. Set rescale intercept to 0.")
 
-    return np.stack(images)
+        if "PixelData" in ds:
+            pixel_data = ds.pixel_array
+            if not isinstance(pixel_data, np.ndarray):
+                pixel_data = np.array(pixel_data)
+            pixel_data = pixel_data.astype(int)
+
+            if replace_padding:
+                if Pixel_Padding_Value in ds:
+                    padding_value = ds[Pixel_Padding_Value].value
+                    positions = np.where(pixel_data == padding_value)
+
+                    if Smallest_Image_Pixel_Value in ds:
+                        smallest = ds[Smallest_Image_Pixel_Value].value
+                    else:
+                        unique_sorted_arr = np.unique(pixel_data)
+                        smallest = unique_sorted_arr[1]
+
+                    pixel_data[positions] = smallest
+
+            pixel_data = pixel_data * slope + intercept
+            images.append(pixel_data)
+        else:
+            logger.warning(f"Dicom file {slice_file} does not contain pixel data.")
+
+    image = np.stack(images).astype(int)
+    return image
 
 
 # JSON

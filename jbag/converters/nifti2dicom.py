@@ -1,6 +1,7 @@
 import os
 import shutil
 
+import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
 from pydicom import Dataset
@@ -147,7 +148,7 @@ def nifti2dicom(input_nifti_file, output_dicom_dir, modality: Modality, force_ov
     transfer_dicom_series_tags(nii2dcm_properties, dicom_ds)
 
     image = nii_data.get_fdata()
-    image = image.astype(np.uint16)
+    image = image.astype(int)
     os.makedirs(output_dicom_dir)
     for instance_index in range(0, nii2dcm_properties["NumberOfInstances"]):
         transfer_dicom_instance_tags(nii2dcm_properties, dicom_ds, instance_index)

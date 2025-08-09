@@ -133,7 +133,7 @@ def image_pixel(ds: Dataset):
     ds.BitsStored = 0
     ds.HighBit = 0
 
-    ds.PixelRepresentation = 0
+    ds.PixelRepresentation = 1
 
     ds.SmallestImagePixelValue = ""
     ds.LargestImagePixelValue = ""
