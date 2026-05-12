@@ -1,0 +1,28 @@
+[build-system]
+requires = ['hatchling']
+build-backend = 'hatchling.build'
+
+[project]
+name = 'jbag'
+version = '4.5.5'
+requires-python = '>=3.11'
+license = 'MIT'
+
+authors = [
+  { name = 'Dai Jian', email = 'daijian@stumail.ysu.edu.cn' },
+]
+
+description = 'Tools for medical image processing and deep learning.'
+
+classifiers = [
+  'Programming Language :: Python :: 3.11',
+]
+
+dependencies = [
+  'scipy',
+  'pandas',
+  'openpyxl',
+  'python-docx',
+  'scikit-image',
+  'numpy'
+]
