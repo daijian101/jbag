@@ -30,7 +30,7 @@ class Config(Mapping[str, Any]):
         return f'Config({self._data!r})'
 
     def __str__(self):
-        return f'Config keys: {', '.join(self._data.keys())}'
+        return f'Config keys: {", ".join(self._data.keys())}'
 
     def __dir__(self):
         return list(self._data.keys())
