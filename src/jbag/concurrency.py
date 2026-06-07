@@ -8,7 +8,7 @@ from jbag import logger
 
 
 def parallel_map(fn,
-                 processes: int,
+                 max_workers: int,
                  args_list: Sequence[tuple] = (),
                  kwargs_list: Sequence[dict] = (),
                  mp_context: str | None = None,
@@ -17,7 +17,7 @@ def parallel_map(fn,
     Run parallel processing using concurrent ProcessPoolExecutor.
     Args:
         fn (function): function to run.
-        processes (int): number of parallel processes.
+        max_workers (int): number of parallel processes.
         args_list (sequence[tuple], optional, default=()): argument groups passed to `fn`.
         kwargs_list (sequence[dict], optional, default=()): keyword-arguments passed to `fn`.
         mp_context (string, optional, default=None): multiprocessing context ('fork', 'spawn', 'forkserver', or None).
@@ -40,14 +40,14 @@ def parallel_map(fn,
         raise ValueError('Mismatched number of args and number of kwargs.')
 
     max_procs = mp.cpu_count()
-    requested_procs = processes
-    processes = min(processes, max_procs, len(args_list) or 1)
-    if processes < requested_procs:
-        logger.warning(f'Adjusted processes to {processes} (CPU limit or task count).')
+    requested_procs = max_workers
+    max_workers = min(max_workers, max_procs, len(args_list) or 1)
+    if max_workers < requested_procs:
+        logger.warning(f'Adjusted processes to {max_workers} (CPU limit or task count).')
 
     mp_context = mp.get_context(mp_context) if mp_context else None
     results = [None] * len(args_list)
-    with ProcessPoolExecutor(max_workers=processes, mp_context=mp_context) as executor:
+    with ProcessPoolExecutor(max_workers=max_workers, mp_context=mp_context) as executor:
         fs = [executor.submit(fn, *args, **kwargs) for args, kwargs in zip(args_list, kwargs_list)]
 
         with tqdm(total=len(args_list), disable=not show_progress_bar) as pbar:
