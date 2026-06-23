@@ -8,7 +8,6 @@ import pandas as pd
 from numpy.lib.format import dtype_to_descr, descr_to_dtype
 from openpyxl import load_workbook
 
-
 from jbag import logger
 
 
@@ -175,7 +174,7 @@ def scp(dst_user, dst_host, dst_path, local_path, dst_port=None, recursive=False
 
 
 def save_excel(output_file, data: dict | pd.DataFrame, sheet_name: str = 'Sheet1', append: bool = False,
-               overlay_sheet: bool = False,
+               if_sheet_exists: str | None = None,
                column_width: int = None, auto_adjust_width: bool = False, index=False):
     """
     Save data to Excel file.
@@ -184,7 +183,11 @@ def save_excel(output_file, data: dict | pd.DataFrame, sheet_name: str = 'Sheet1
         data (dict | pd.DataFrame):
         sheet_name (str, optional, default='Sheet1'):
         append (bool, optional, default=False): if True, append to existing file.
-        overlay_sheet (bool, optional, default=False): if True, overwrite existing sheet. Note that this option only works for appending mode.
+        if_sheet_exists (str, optional, default=None): Optional values:
+            1. 'error': Raises a error if the sheet already exists.
+            2. 'new_name': Creates a new sheet with a modified sheet name, e.g., Sheet1 becomes Sheet11.
+            3. 'replace': Drops the existing sheet entirely and creates a fresh one with your new data.
+            4. 'overlay': Writes new data onto the existing sheet. Existing data is only overwritten where the new data overlaps.
         column_width (int, optional, default=None): set column width to the given value, if exist.
         auto_adjust_width (bool, optional, default=False): if True, adjust column width according to the content length.
         index (bool, optional, default=False): if True, set index column on the work sheet.
@@ -198,9 +201,7 @@ def save_excel(output_file, data: dict | pd.DataFrame, sheet_name: str = 'Sheet1
         logger.warning(f'Try to append data to a non-existing file: {output_file}, change mode to write instead.')
         write_mode = 'w'
 
-    if write_mode == 'a' and overlay_sheet:
-        if_sheet_exists = 'overlay'
-    else:
+    if write_mode == 'w' and if_sheet_exists is not None:
         if_sheet_exists = None
 
     if isinstance(data, dict):
