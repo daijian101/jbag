@@ -43,7 +43,7 @@ def parallel_map(fn,
     requested_procs = max_workers
     max_workers = min(max_workers, max_procs, len(args_list) or 1)
     if max_workers < requested_procs:
-        logger.warning(f'Adjusted processes to {max_workers} (CPU limit or task count).')
+        logger.warning(f'Adjusted processes to {max_workers} due to CPU limitation or number of tasks.')
 
     mp_context = mp.get_context(mp_context) if mp_context else None
     results = [None] * len(args_list)
