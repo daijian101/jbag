@@ -55,6 +55,6 @@ class CheckpointManager:
                 optimizer.load_state_dict(optimizer_state)
                 log.info(f'Optimizer state loaded from {checkpoint_file}.')
             else:
-                logger.warning(f'{checkpoint_file} does not contain optimizer state.')
+                log.warning(f'{checkpoint_file} does not contain optimizer state.')
 
         return checkpoint

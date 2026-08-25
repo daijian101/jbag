@@ -8,7 +8,7 @@ import pandas as pd
 from numpy.lib.format import dtype_to_descr, descr_to_dtype
 from openpyxl import load_workbook
 
-from jbag import logger
+from jbag import log
 
 
 def read_file_to_list(input_file):
@@ -198,7 +198,7 @@ def save_excel(output_file, data: dict | pd.DataFrame, sheet_name: str = 'Sheet1
     write_mode = 'a' if append else 'w'
 
     if write_mode == 'a' and not os.path.exists(output_file):
-        logger.warning(f'Try to append data to a non-existing file: {output_file}, change mode to write instead.')
+        log.warning(f'Try to append data to a non-existing file: {output_file}, change mode to write instead.')
         write_mode = 'w'
 
     if write_mode == 'w' and if_sheet_exists is not None:
