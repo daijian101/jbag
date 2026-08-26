@@ -4,7 +4,9 @@ from typing import Sequence
 
 from tqdm import tqdm
 
-from jbag import log
+from jbag import setup_logger
+
+logger = setup_logger(__name__)
 
 
 def parallel_map(fn,
@@ -43,7 +45,7 @@ def parallel_map(fn,
     requested_procs = max_workers
     max_workers = min(max_workers, max_procs, len(args_list) or 1)
     if max_workers < requested_procs:
-        log.warning(f'Adjusted processes to {max_workers} due to CPU limitation or number of tasks.')
+        logger.warning(f'Adjusted processes to {max_workers} due to CPU limitation or number of tasks.')
 
     mp_context = mp.get_context(mp_context) if mp_context else None
     results = [None] * len(args_list)

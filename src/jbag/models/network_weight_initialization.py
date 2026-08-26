@@ -2,8 +2,10 @@ from functools import partial
 
 import torch.nn as nn
 
-from jbag import log
+from jbag import setup_logger
 from jbag.config import Config
+
+logger = setup_logger(__name__)
 
 
 def kaiming_initialize(module, a=1e-2, nonlinearity='leaky_relu'):
@@ -42,12 +44,12 @@ def initialize_network(network: nn.Module, network_config: Config):
         if 'params' in network_config.initialization:
             network_initialization_params = network_config.initialization.params.as_dict()
         else:
-            log.warning('No initialization parameters were provided for network weight initialization.')
+            logger.warning('No initialization parameters were provided for network weight initialization.')
 
     if allow_init:
-        log.info(f'********Initializing network weights********')
-        log.info(f'Method {method}')
-        log.info(f'Params: {network_initialization_params}')
-        log.info(f'********Initializing network weights********')
+        logger.info(f'********Initializing network weights********')
+        logger.info(f'Method {method}')
+        logger.info(f'Params: {network_initialization_params}')
+        logger.info(f'********Initializing network weights********')
         init_fn = partial(get_initialization_fn(method), **network_initialization_params)
         network.apply(init_fn)

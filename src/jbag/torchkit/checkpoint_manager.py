@@ -7,9 +7,11 @@ from torch.nn import DataParallel
 from torch.nn.parallel import DistributedDataParallel
 from torch.optim import Optimizer
 
+from jbag import setup_logger
 from jbag.io import ensure_output_file_dir_existence
-from jbag.log import log
 from jbag.torchkit import is_main_process
+
+logger = setup_logger(__name__)
 
 
 class CheckpointManager:
@@ -84,6 +86,6 @@ class CheckpointManager:
                 else:
                     raise KeyError(f'Checkpoint file {checkpoint_file} does not contain {key}.')
 
-        log.info(f'Checkpoint loaded from {checkpoint_file}.')
+        logger.info(f'Checkpoint loaded from {checkpoint_file}.')
 
         return values if values else checkpoint
