@@ -46,7 +46,7 @@ class CheckpointManager:
         checkpoint.update(kwargs)
         ensure_output_file_dir_existence(output_file)
         torch.save(checkpoint, output_file)
-        log.info(f'Checkpoint saved to {output_file}.')
+        logger.info(f'Checkpoint saved to {output_file}.')
 
     @staticmethod
     def load_checkpoint(checkpoint_file: str | Path,

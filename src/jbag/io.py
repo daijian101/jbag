@@ -175,14 +175,16 @@ def scp(dst_user, dst_host, dst_path, local_path, dst_port=None, recursive=False
     os.system(cmd)
 
 
-def save_excel(output_file, data: dict | pd.DataFrame, sheet_name: str = 'Sheet1', append: bool = False,
+def save_excel(output_file, data: list | dict | pd.DataFrame, columns: list | None = None, sheet_name: str = 'Sheet1',
+               append: bool = False,
                if_sheet_exists: str | None = None,
                column_width: int = None, auto_adjust_width: bool = False, index=False):
     """
     Save data to Excel file.
     Args:
         output_file (str):
-        data (dict | pd.DataFrame):
+        data (list | dict | pd.DataFrame):
+        columns (list, optional, default=None): column header.
         sheet_name (str, optional, default='Sheet1'):
         append (bool, optional, default=False): if True, append to existing file.
         if_sheet_exists (str, optional, default=None): Optional values:
@@ -190,7 +192,7 @@ def save_excel(output_file, data: dict | pd.DataFrame, sheet_name: str = 'Sheet1
             2. 'new_name': Creates a new sheet with a modified sheet name, e.g., Sheet1 becomes Sheet11.
             3. 'replace': Drops the existing sheet entirely and creates a fresh one with your new data.
             4. 'overlay': Writes new data onto the existing sheet. Existing data is only overwritten where the new data overlaps.
-        column_width (int, optional, default=None): set column width to the given value, if exist.
+        column_width (int, optional, default=None): set column width to the given value.
         auto_adjust_width (bool, optional, default=False): if True, adjust column width according to the content length.
         index (bool, optional, default=False): if True, set index column on the work sheet.
 
@@ -206,13 +208,17 @@ def save_excel(output_file, data: dict | pd.DataFrame, sheet_name: str = 'Sheet1
     if write_mode == 'w' and if_sheet_exists is not None:
         if_sheet_exists = None
 
-    if isinstance(data, dict):
-        data = pd.DataFrame(data)
+    header = True
+    if isinstance(data, list) and columns is None:
+        header = False
+
+    if not isinstance(data, pd.DataFrame):
+        data = pd.DataFrame(data, columns=columns)
 
     ensure_output_file_dir_existence(output_file)
 
     with pd.ExcelWriter(output_file, engine='openpyxl', mode=write_mode, if_sheet_exists=if_sheet_exists) as writer:
-        data.to_excel(writer, sheet_name=sheet_name, index=index)
+        data.to_excel(writer, sheet_name=sheet_name, index=index, header=header)
 
     if column_width is not None or auto_adjust_width:
         book = load_workbook(output_file)
