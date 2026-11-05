@@ -15,6 +15,7 @@ class SpatialTransform(RandomTransform):
                  patch_center_dist_from_border: int | list[int] | tuple[int, ...] = 0,
                  random_crop: bool = False,
                  interpolation_modes: str | list[str] | tuple[str, ...] = 'nearest',
+                 padding_modes: str | list[str] | tuple[str, ...] = 'zeros',
                  p_rotation: float = 0.0,
                  rotation_angle_range: float | list[float] | tuple[float, float] = (0, 2 * np.pi),
                  p_scaling: float = 0.0,
@@ -32,6 +33,7 @@ class SpatialTransform(RandomTransform):
             patch_size (sequence or None, optional, default=None):
             random_crop (bool, optional, default=False): if True, crop patch improc randomly.
             interpolation_modes (str or sequence(str), optional, default='nearest'): interpolation modes for value of keys.
+            padding_modes (str or sequence, optional, default='zeros'): padding modes for value of keys.
             Supported options 'nearest' | 'bilinear'.
             p_rotation (float, optional, default=0): probability of applying rotation.
             rotation_angle_range (float or sequence, optional, default=[0, 2 * np.pi]):
@@ -59,9 +61,10 @@ class SpatialTransform(RandomTransform):
         self.random_crop = random_crop
         if isinstance(interpolation_modes, str):
             interpolation_modes = [interpolation_modes] * len(self.keys)
-
         self.interpolation_modes = interpolation_modes
-
+        if isinstance(padding_modes, str):
+            padding_modes = [padding_modes] * len(self.keys)
+        self.padding_modes = padding_modes
         self.rotation_angle_range = rotation_angle_range
         self.scaling = scaling_range
         self.p_synchronize_scaling_across_axes = p_synchronize_scaling_across_axes
@@ -87,9 +90,9 @@ class SpatialTransform(RandomTransform):
             angles = [0] * spatial_dims
 
         if do_scale:
-            scales = [get_scalar(self.scaling) for _ in
-                      range(spatial_dims)] if np.random.random_sample() < self.p_synchronize_scaling_across_axes \
-                else [get_scalar(self.scaling)] * spatial_dims
+            scales = [get_scalar(self.scaling)] * spatial_dims \
+                if np.random.random_sample() < self.p_synchronize_scaling_across_axes \
+                else [get_scalar(self.scaling) for _ in range(spatial_dims)]
         else:
             scales = [1] * spatial_dims
 
@@ -107,10 +110,10 @@ class SpatialTransform(RandomTransform):
         if do_deform:
             do_grid_sampling = True
             grid_scale = [i / j for i, j in zip(original_spatial_shape, patch_size)]
-            deformation_scales = [
-                get_scalar(self.elastic_deform_scale) for _ in
-                range(spatial_dims)] if np.random.random_sample() < self.p_synchronize_scaling_across_axes \
-                else [get_scalar(self.elastic_deform_scale)] * spatial_dims
+            deformation_scales = [get_scalar(
+                self.elastic_deform_scale)] * spatial_dims \
+                if np.random.random_sample() < self.p_synchronize_scaling_across_axes \
+                else [get_scalar(self.elastic_deform_scale) for _ in range(spatial_dims)]
             # sigmas must be in pixels, as this will be applied to the deformation field
             sigmas = [i * j for i, j in zip(deformation_scales, patch_size)]
             # the magnitude of the deformation field must adhere to the torchkit's value range for grid_sample, i.e. [-1. 1] and not pixel coordinates. Do not use sigmas here
@@ -174,7 +177,8 @@ class SpatialTransform(RandomTransform):
                 dtype = value.dtype
                 if dtype is not torch.float32:
                     value = value.to(torch.float32)
-                value = grid_sample(value[None], grid[None], mode=self.interpolation_modes[i], padding_mode='zeros',
+                value = grid_sample(value[None], grid[None],
+                                    mode=self.interpolation_modes[i], padding_mode=self.padding_modes[i],
                                     align_corners=False).to(dtype)[0]
             else:
                 if patch_size != original_spatial_shape:

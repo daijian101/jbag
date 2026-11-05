@@ -1,7 +1,7 @@
 from .transform import Transform
 from .brightness import MultiplicativeBrightnessTransform
 from .contrast import ContrastTransform
-from .data import ToType, ToTensor, AddChannel, Repeat
+from .data import ToType, ToTensor, AddChannel, Repeat, Convert3DTo2D, Convert2DTo3D
 from .distance import SDF
 from .downsample import DownsampleTransform
 from .gamma import GammaTransform

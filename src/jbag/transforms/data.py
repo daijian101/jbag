@@ -45,7 +45,12 @@ class AddChannel(Transform):
     def _call_fun(self, data):
         for key in self.keys:
             value = data[key]
-            value = np.expand_dims(value, axis=self.axis)
+            if isinstance(value, np.ndarray):
+                value = np.expand_dims(value, axis=self.axis)
+            elif isinstance(value, torch.Tensor):
+                value = torch.unsqueeze(value, dim=self.axis)
+            else:
+                raise TypeError(f"Unsupported type {type(value)}.")
             data[key] = value
         return data
 
@@ -69,4 +74,35 @@ class Repeat(Transform):
             value = data[key]
             value = np.repeat(value, self.repeats, axis=self.axis)
             data[key] = value
+        return data
+
+
+class Convert3DTo2D(Transform):
+    def __init__(self, keys):
+        super().__init__(keys)
+
+    def _call_fun(self, data):
+        for key in self.keys:
+            shape_key = f'orig_shape_{key}'
+            if shape_key in data:
+                raise KeyError(f"{shape_key} already exists.")
+
+            value = data[key]
+            data[shape_key] = value.shape
+            data[key] = value.reshape(-1, *value.shape[-2:])
+        return data
+
+
+class Convert2DTo3D(Transform):
+    def __init__(self, keys):
+        super().__init__(keys)
+
+    def _call_fun(self, data):
+        for key in self.keys:
+            shape_key = f'orig_shape_{key}'
+            if not shape_key in data:
+                raise KeyError(f"{shape_key} does not exist.")
+            orig_shape = data.pop(shape_key)
+
+            data[key] = data[key].reshape(orig_shape)
         return data
