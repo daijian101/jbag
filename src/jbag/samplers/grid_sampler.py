@@ -1,7 +1,6 @@
 import numpy as np
 import torch
 import torch.nn.functional as F
-from cavass import CAVASS
 
 from jbag.samplers.coordinate_generator import GridCoordinateGenerator
 from jbag.samplers.utils import central_crop, get_margin
