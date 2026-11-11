@@ -1,7 +1,11 @@
+from docx.enum.table import WD_ALIGN_VERTICAL
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.shared import OxmlElement, qn
 from docx.shared import Cm
-from docx.shared import Pt
 from docx.table import _Cell, Table
+
+AFTER_TBLW = ("w:jc", "w:tblCellSpacing", "w:tblInd", "w:tblBorders", "w:shd",
+              "w:tblLayout", "w:tblCellMar", "w:tblLook")
 
 
 def cm_to_dxa(cm):
@@ -11,51 +15,20 @@ def cm_to_dxa(cm):
     return int(cm * 1440 / 2.54)
 
 
-def set_cell(cell: _Cell, text, font='Times New Roman', font_size=10, bold=False, italic=False,
-             underline=False, cell_margins: list[float] = [0.1, 0.1, 0.0, 0.0]):
+def set_cell_margins(cell: _Cell, top: float = 0, left: float = 0.1, bottom: float = 0.1, right: float = 0):
     """
-    Set cell text and properties.
-    Args:
-        cell (docx.table._Cell):
-        text (str):
-        font (str, optional, default='Times New Roman'):
-        font_size (int, optional, default=10):
-        bold (bool, optional, default=False):
-        italic (bool, optional, default=False):
-        underline (bool, optional, default=False):
-        cell_margins (list, optional, default=[]): the cell margins should be in the format of [left, right, top, bottom] in the unit of centimeter.
-
-    Returns:
-
+    Set cell margins in cm.
     """
-    cell.text = text
-    run = cell.paragraphs[0].runs[0]
-    run.font.name = font
-    run.font.size = Pt(font_size)
-    run.font.bold = bold
-    run.font.italic = italic
-    run.font.underline = underline
-    if cell_margins:
-        tc = cell._tc
-        tcPr = tc.get_or_add_tcPr()
-
-        tcMar = tcPr.find(qn('w:tcMar'))
-        if tcMar is None:
-            tcMar = OxmlElement('w:tcMar')
-            tcPr.append(tcMar)
-
-        margin_keys = ['left', 'right', 'top', 'bottom']
-        for i, value in enumerate(cell_margins):
-            if value is None:
-                continue
-
-            tag = 'w:{}'.format(margin_keys[i])
-            margin_element = tcMar.find(qn(tag))
-            if margin_element is None:
-                margin_element = OxmlElement(tag)
-                tcMar.append(margin_element)
-            margin_element.set(qn('w:w'), str(int(Cm(value).twips)))
-            margin_element.set(qn('w:type'), 'dxa')
+    tcPr = cell._tc.get_or_add_tcPr()
+    for e in tcPr.findall(qn("w:tcMar")):
+        tcPr.remove(e)
+    mar = OxmlElement("w:tcMar")
+    for tag, v in (("top", top), ("left", left), ("bottom", bottom), ("right", right)):
+        el = OxmlElement("w:" + tag)
+        el.set(qn("w:w"), str(int(cm_to_dxa(v))))
+        el.set(qn("w:type"), "dxa")  # dxa = twips
+        mar.append(el)
+    tcPr.insert_element_before(mar, "w:textDirection", "w:tcFitText", "w:vAlign", "w:hideMark")
 
 
 def set_cell_border(cell: _Cell,
@@ -154,3 +127,137 @@ def set_column_widths(table, widths_cm):
 
                 tcW.set(qn('w:w'), str(int(Cm(w_cm).twips)))
                 tcW.set(qn('w:type'), 'dxa')
+
+
+def set_cell_alignment(cell: _Cell, alignment: str, vertical_center: bool = True):
+    for p in cell.paragraphs:
+        p.alignment = WD_ALIGN_PARAGRAPH[alignment.upper()]
+
+    if vertical_center:
+        cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+
+
+def align_table(table: Table,
+                first_column_alignment: str = 'left',
+                rest_column_alignment: str = 'center',
+                vertical_center: bool = True):
+    first_column_alignment = WD_ALIGN_PARAGRAPH[first_column_alignment.upper()]
+    rest_column_alignment = WD_ALIGN_PARAGRAPH[rest_column_alignment.upper()]
+    for row in table.rows:
+        for i, cell in enumerate(row.cells):
+            alignment = first_column_alignment if i == 0 else rest_column_alignment
+            for p in cell.paragraphs:
+                p.alignment = alignment
+            if vertical_center:
+                cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+
+
+def set_table_paragraph_spacing(table: Table, before: float | None = None, after: float | None = None):
+    for row in table.rows:
+        for cell in row.cells:
+            for p in cell.paragraphs:
+                if before is not None:
+                    p.paragraph_format.space_before = before
+                if after is not None:
+                    p.paragraph_format.space_after = after
+
+
+def set_table_cell_margins(table: Table, top: float = 0, left: float = 0.1, bottom: float = 0.1, right: float = 0):
+    """
+    Set cell margins for the table in cm.
+
+    """
+    tblPr = table._tbl.tblPr
+    for e in tblPr.findall(qn("w:tblCellMar")):
+        tblPr.remove(e)
+    mar = OxmlElement("w:tblCellMar")
+    for tag, v in (("top", top), ("left", left), ("bottom", bottom), ("right", right)):
+        el = OxmlElement("w:" + tag)
+        el.set(qn("w:w"), str(int(cm_to_dxa(v))))
+        el.set(qn("w:type"), "dxa")
+        mar.append(el)
+    tblPr.insert_element_before(mar, "w:tblLook")
+
+
+def _set_tblw(table, typ, val):
+    tblPr = table._tbl.tblPr
+    for e in tblPr.findall(qn("w:tblW")):
+        tblPr.remove(e)
+    w = OxmlElement("w:tblW")
+    w.set(qn("w:type"), typ)
+    w.set(qn("w:w"), str(val))
+    tblPr.insert_element_before(w, *AFTER_TBLW)
+
+
+def _set_layout(table, mode="autofit"):
+    tblPr = table._tbl.tblPr
+    for e in tblPr.findall(qn("w:tblLayout")):
+        tblPr.remove(e)
+    lay = OxmlElement("w:tblLayout")
+    lay.set(qn("w:type"), mode)
+    tblPr.insert_element_before(lay, "w:tblCellMar", "w:tblLook")
+
+
+def _clear_widths(table):
+    for row in table.rows:
+        for cell in row.cells:
+            tcPr = cell._tc.get_or_add_tcPr()
+            for e in tcPr.findall(qn("w:tcW")):
+                tcPr.remove(e)
+    for gc in table._tbl.tblGrid.findall(qn("w:gridCol")):
+        gc.set(qn("w:w"), "0")
+
+
+def autofit(table, mode):
+    """
+    mode: 'contents' | 'window' | 'fill'
+    """
+    _set_layout(table, "autofit")
+    if mode == "contents":
+        _set_tblw(table, "auto", 0)
+        _clear_widths(table)
+    elif mode == "window":
+        _set_tblw(table, "pct", 5000)
+    elif mode == "fill":
+        _set_tblw(table, "pct", 5000)
+        _clear_widths(table)
+
+
+def set_table_style(table: Table,
+                    cell_margins: list[float] = [0, 0.1, 0.1, 0],
+                    three_line_border: bool = True,
+                    outer_border_line_size: float = 1,
+                    inner_border_line_size: float = 0.5,
+                    first_column_alignment: str = 'left',
+                    rest_column_alignment: str = 'center',
+                    vertical_center_alignment: bool = True,
+                    paragraph_spacing_before: float = 0,
+                    paragraph_spacing_after: float = 0,
+                    fit_mode: str = 'fill'):
+    """
+
+    Args:
+        table (Table):
+        cell_margins (list):
+        three_line_border (bool):
+        outer_border_line_size (float): In pt.
+        inner_border_line_size (float): In pt.
+        first_column_alignment (str):
+        rest_column_alignment (str):
+        vertical_center_alignment (bool):
+        paragraph_spacing_before (float):
+        paragraph_spacing_after (float):
+        fit_mode (str):
+
+    Returns:
+
+    """
+    assert len(cell_margins) == 4
+    set_table_cell_margins(table, cell_margins[0], cell_margins[1], cell_margins[2], cell_margins[3])
+
+    if three_line_border:
+        set_three_line_border(table, outer_border_line_size, inner_border_line_size)
+
+    align_table(table, first_column_alignment, rest_column_alignment, vertical_center_alignment)
+    set_table_paragraph_spacing(table, paragraph_spacing_before, paragraph_spacing_after)
+    autofit(table, fit_mode)

@@ -1,9 +1,10 @@
 import os.path
 
+from docx.document import Document as DocumentClass
 from docx import Document
 
 
-def import_style_from_template(doc: Document, template_doc_file):
+def import_style_from_template(doc: DocumentClass, template_doc_file):
     if not os.path.exists(template_doc_file):
         raise FileNotFoundError(f'Template Doc file {template_doc_file} not found.')
 
