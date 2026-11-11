@@ -1,7 +1,7 @@
 from docx.enum.table import WD_ALIGN_VERTICAL
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
 from docx.oxml.shared import OxmlElement, qn
-from docx.shared import Cm
+from docx.shared import Cm, Pt
 from docx.table import _Cell, Table
 
 AFTER_TBLW = ("w:jc", "w:tblCellSpacing", "w:tblInd", "w:tblBorders", "w:shd",
@@ -152,7 +152,8 @@ def align_table(table: Table,
                 cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 
 
-def set_table_paragraph_spacing(table: Table, before: float | None = None, after: float | None = None):
+def set_table_paragraph_spacing(table: Table, before: float | None = None, after: float | None = None,
+                                line_spacing: float | str | None = None):
     for row in table.rows:
         for cell in row.cells:
             for p in cell.paragraphs:
@@ -160,6 +161,11 @@ def set_table_paragraph_spacing(table: Table, before: float | None = None, after
                     p.paragraph_format.space_before = before
                 if after is not None:
                     p.paragraph_format.space_after = after
+                if line_spacing is not None:
+                    if isinstance(line_spacing, str):
+                        p.paragraph_format.line_spacing_rule = WD_LINE_SPACING[line_spacing.upper()]
+                    else:
+                        p.paragraph_format.line_spacing = Pt(line_spacing)
 
 
 def set_table_cell_margins(table: Table, top: float = 0, left: float = 0.1, bottom: float = 0.1, right: float = 0):
@@ -233,6 +239,7 @@ def set_table_style(table: Table,
                     vertical_center_alignment: bool = True,
                     paragraph_spacing_before: float = 0,
                     paragraph_spacing_after: float = 0,
+                    paragraph_line_spacing: float | str = 'single',
                     fit_mode: str = 'fill'):
     """
 
@@ -247,6 +254,7 @@ def set_table_style(table: Table,
         vertical_center_alignment (bool):
         paragraph_spacing_before (float):
         paragraph_spacing_after (float):
+        paragraph_line_spacing (float or str):
         fit_mode (str):
 
     Returns:
@@ -259,5 +267,5 @@ def set_table_style(table: Table,
         set_three_line_border(table, outer_border_line_size, inner_border_line_size)
 
     align_table(table, first_column_alignment, rest_column_alignment, vertical_center_alignment)
-    set_table_paragraph_spacing(table, paragraph_spacing_before, paragraph_spacing_after)
+    set_table_paragraph_spacing(table, paragraph_spacing_before, paragraph_spacing_after, paragraph_line_spacing)
     autofit(table, fit_mode)
